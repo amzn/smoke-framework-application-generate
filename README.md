@@ -15,7 +15,7 @@
 <img src="https://img.shields.io/badge/license-Apache2-blue.svg?style=flat" alt="Apache 2">
 </p>
 
-# SwiftAWSGenerate
+# SmokeFrameworkApplicationGenerate
 
 Code generator to generate [SmokeFramework](https://github.com/amzn/smoke-framework)-based applications from service models.
 
