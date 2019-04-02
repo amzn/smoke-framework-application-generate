@@ -1,0 +1,34 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "ServiceModelSwiftCodeGenerate",
+        "repositoryURL": "https://github.com/amzn/service-model-swift-code-generate.git",
+        "state": {
+          "branch": null,
+          "revision": "0b039a664e7c029e3efeb99d9fb4c20f8d9907e8",
+          "version": "0.3.0"
+        }
+      },
+      {
+        "package": "SwaggerParser",
+        "repositoryURL": "https://github.com/tachyonics/SwaggerParser.git",
+        "state": {
+          "branch": null,
+          "revision": "043d807776630b4681e646106b48cefe739a5a31",
+          "version": "0.6.3"
+        }
+      },
+      {
+        "package": "Yams",
+        "repositoryURL": "https://github.com/jpsim/Yams.git",
+        "state": {
+          "branch": null,
+          "revision": "6652aa7b793d3c8a075db0614acb575fcaecf457",
+          "version": "0.7.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
