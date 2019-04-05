@@ -57,6 +57,8 @@ swift run -c release SmokeFrameworkApplicationGenerate \
   --model-override-path /Volumes/Workspace/smoke-framework-examples/PersistenceExampleService/modelOverride.json
 ```
 
+An example service based on the command above can be found [here](https://github.com/amzn/smoke-framework-examples/tree/master/PersistenceExampleService).
+
 # Step 5: Modify the stubbed service generated
 
 The code generator will produce a Swift Package Manager repository with the following directory structure-
