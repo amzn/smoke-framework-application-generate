@@ -6,8 +6,17 @@
         "repositoryURL": "https://github.com/amzn/service-model-swift-code-generate.git",
         "state": {
           "branch": null,
-          "revision": "0b039a664e7c029e3efeb99d9fb4c20f8d9907e8",
-          "version": "0.3.0"
+          "revision": "3fa1b5acd283bdf4a72339ce0740a286cc26e313",
+          "version": "0.4.0"
+        }
+      },
+      {
+        "package": "SmokeAWSGenerate",
+        "repositoryURL": "https://github.com/amzn/smoke-aws-generate.git",
+        "state": {
+          "branch": null,
+          "revision": "d8589ac389269b8f57f047ef20fd1eb356283dbc",
+          "version": "0.4.1"
         }
       },
       {
