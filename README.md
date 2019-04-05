@@ -25,18 +25,70 @@ Code generator to generate [SmokeFramework](https://github.com/amzn/smoke-framew
 
 Clone this repository to your local machine.
 
-## Step 3: Run the code generator
+## Step 2: Create a new directory in which to create your service.
+
+You will point this code generator to this directory to output the generated code.
+
+## Step 3: Create a model describing your service using Swagger 2.0
+
+Follow the [Swagger specification](https://swagger.io/docs/specification/2-0/basic-structure/) to create an API specification for your service.
+
+## Step 4: Run the code generator
 
 From within your checked out copy of this repository, run this command-
 
 ```bash
 swift run -c release SmokeFrameworkApplicationGenerate \
-  --base-file-path <output_file_path> \
-  --base-name <base_client_name> \
-  --model-path <file_path_to_model> \
+  --base-file-path <the path to where you want the service to be generated> \
+  --base-name <a base name for your service (without the "Service" postfix)> \
+  --model-path <the path to the Swagger model you created> \
   --generation-type [server: to generate a new service|serverUpdate: to preserve changes to existing operation handlers]
- [--model-override-path <file_path_to_model_override>]
+ [--model-override-path <optionally the path to a json file that specifies various overrides to the model>]
 ```
+
+And example command would look like this-
+
+```bash
+swift run -c release SmokeFrameworkApplicationGenerate \
+  --base-file-path /Volumes/Workspace/smoke-framework-examples/PersistenceExampleService \
+  --base-name PersistenceExample \
+  --model-path /Volumes/Workspace/smoke-framework-examples/PersistenceExampleService/Swagger.yaml \
+  --generation-type server \
+  --model-override-path /Volumes/Workspace/smoke-framework-examples/PersistenceExampleService/modelOverride.json
+```
+
+# Step 5: Modify the stubbed service generated
+
+The code generator will produce a Swift Package Manager repository with the following directory structure-
+
+```bash
+- Package.swift
+- .swiftlint
+- .gitignore
+- Sources
+ - <base-name>Client
+ - <base-name>Model
+ - <base-name>Operations
+ - <base-name>OperationsHTTP1
+ - <base-name>Service
+- Tests
+ - LinuxMain.swift      
+ - <base-name>OperationsTests
+```
+
+The following three sections of the repository provides initial stubs and can be filled out as required for the service.  
+A `generation-type` of `serverUpdate` will not overwrite changes in these sections-
+
+* **<base-name>Operations:** Stub implementations for each operation; should be modified to fullfill the services's logic.
+* **<base-name>OperationsTests:** Stub test implementations for each operation; should be modified to test the services's logic.
+* **<base-name>Service:** Operations context initialization and shutdown code; should be modified to create the context for the current environment.
+
+The following three section contain code generated code to help the service operate but should not be manually modified. 
+A `generation-type` of `serverUpdate` will overwrite changes in these sections-
+
+* **<base-name>Client:** APIGateway and mock clients for the service; should not be manually modified.
+* **<base-name>Client:** Input and output structures and types for the service; should not be manually modified.
+* **<base-name>Client:** Operation selection and input/output type handling specific to HTTP1; should not be manually modified.
 
 ## License
 
