@@ -66,29 +66,29 @@ The code generator will produce a Swift Package Manager repository with the foll
 - .swiftlint
 - .gitignore
 - Sources
- - <base-name>Client
- - <base-name>Model
- - <base-name>Operations
- - <base-name>OperationsHTTP1
- - <base-name>Service
+  - (base-name)Client
+  - (base-name)Model
+  - (base-name)Operations
+  - (base-name)OperationsHTTP1
+  - (base-name)Service
 - Tests
- - LinuxMain.swift      
- - <base-name>OperationsTests
+  - LinuxMain.swift      
+  - <base-name>OperationsTests
 ```
 
 The following three sections of the repository provides initial stubs and can be filled out as required for the service.  
 A `generation-type` of `serverUpdate` will not overwrite changes in these sections-
 
-* **<base-name>Operations:** Stub implementations for each operation; should be modified to fullfill the services's logic.
-* **<base-name>OperationsTests:** Stub test implementations for each operation; should be modified to test the services's logic.
-* **<base-name>Service:** Operations context initialization and shutdown code; should be modified to create the context for the current environment.
+* **(base-name)Operations:** Stub implementations for each operation; should be modified to fullfill the services's logic.
+* **(base-name)OperationsTests:** Stub test implementations for each operation; should be modified to test the services's logic.
+* **(base-name)Service:** Operations context initialization and shutdown code; should be modified to create the context for the current environment.
 
 The following three section contain code generated code to help the service operate but should not be manually modified. 
 A `generation-type` of `serverUpdate` will overwrite changes in these sections-
 
-* **<base-name>Client:** APIGateway and mock clients for the service; should not be manually modified.
-* **<base-name>Client:** Input and output structures and types for the service; should not be manually modified.
-* **<base-name>Client:** Operation selection and input/output type handling specific to HTTP1; should not be manually modified.
+* **(base-name)Client:** APIGateway and mock clients for the service; should not be manually modified.
+* **(base-name)Client:** Input and output structures and types for the service; should not be manually modified.
+* **(base-name)Client:** Operation selection and input/output type handling specific to HTTP1; should not be manually modified.
 
 ## License
 
