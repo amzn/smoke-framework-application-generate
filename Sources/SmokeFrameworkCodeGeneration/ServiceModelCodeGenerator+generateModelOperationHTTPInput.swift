@@ -23,7 +23,7 @@ public extension ServiceModelCodeGenerator {
     /**
      Generate HTTP input for each operation.
      */
-    public func generateModelOperationHTTPInput() {
+    func generateModelOperationHTTPInput() {
         let baseName = applicationDescription.baseName
         
         let fileBuilder = FileBuilder()
