@@ -1,0 +1,29 @@
+#!/bin/bash
+set -e
+
+swiftLintVersion=0.36.0
+
+USE_SWIFT_LINT=$1
+
+apt-get update
+apt-get -y install libssl-dev libz-dev
+
+workspaceRoot=($PWD)
+srcRoot=$workspaceRoot/sources
+mkdir -p $srcRoot
+
+if [ "$USE_SWIFT_LINT" == 'yes' ]; then
+    # SwiftLint
+    cd $srcRoot
+    git clone --branch $swiftLintVersion https://github.com/realm/SwiftLint.git
+    cd SwiftLint
+    swift build -c release --build-path .build/native --disable-prefetching
+    cp .build/native/release/swiftlint /usr/bin
+fi
+
+cd $workspaceRoot/package
+swift build
+
+if [ "$USE_SWIFT_LINT" == 'yes' ]; then
+    swiftlint
+fi

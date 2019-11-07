@@ -1,0 +1,34 @@
+# Matrix of required of OS and Swift releases
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      sudo: required
+      services: docker
+      env: DOCKER_IMAGE_TAG=swift:5.1-bionic USE_SWIFT_LINT=yes
+    - os: linux
+      dist: xenial
+      sudo: required
+      services: docker
+      env: DOCKER_IMAGE_TAG=swift:5.1-xenial USE_SWIFT_LINT=yes
+    - os: linux
+      dist: xenial
+      sudo: required
+      services: docker
+      env: DOCKER_IMAGE_TAG=swift:5.0.1-bionic USE_SWIFT_LINT=yes
+    - os: linux
+      dist: xenial
+      sudo: required
+      services: docker
+      env: DOCKER_IMAGE_TAG=swift:5.0.1-xenial USE_SWIFT_LINT=yes
+    - os: linux
+      dist: xenial
+      sudo: required
+      services: docker
+      env: DOCKER_IMAGE_TAG=swift:4.2.1 USE_SWIFT_LINT=no
+
+before_install:
+  - docker pull $DOCKER_IMAGE_TAG
+
+script:
+  - docker run -v ${TRAVIS_BUILD_DIR}:/package ${DOCKER_IMAGE_TAG} /bin/bash -c "/package/CITests/run $USE_SWIFT_LINT"

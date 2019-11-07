@@ -24,7 +24,7 @@ public extension ServiceModelCodeGenerator {
     /**
      Generate HTTP output for each operation.
      */
-    public func generateModelOperationHTTPOutput() {
+    func generateModelOperationHTTPOutput() {
         let baseName = applicationDescription.baseName
         
         let fileBuilder = FileBuilder()
