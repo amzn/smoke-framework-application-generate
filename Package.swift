@@ -26,7 +26,7 @@ let package = Package(
             targets: ["SmokeFrameworkCodeGeneration"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/amzn/smoke-aws-generate.git", from: "2.0.0-alpha.2"),
+        .package(url: "https://github.com/amzn/smoke-aws-generate.git", from: "2.0.0-alpha.3"),
         .package(url: "https://github.com/amzn/service-model-swift-code-generate.git", from: "2.0.0-alpha.2"),
     ],
     targets: [

@@ -160,9 +160,9 @@ extension ServiceModelCodeGenerator {
                         targets: ["\(baseName)\(applicationSuffix)"]),
                     ],
                 dependencies: [
-                    .package(url: "https://github.com/amzn/smoke-framework.git", .branch("1_x_compatible_server")),
-                    .package(url: "https://github.com/amzn/smoke-aws-credentials.git", from: "2.0.0-alpha.2"),
-                    .package(url: "https://github.com/amzn/smoke-aws.git", from: "2.0.0-alpha.4"),
+                    .package(url: "https://github.com/amzn/smoke-framework.git", from: "2.0.0-alpha.4"),
+                    .package(url: "https://github.com/amzn/smoke-aws-credentials.git", from: "2.0.0-alpha.3"),
+                    .package(url: "https://github.com/amzn/smoke-aws.git", from: "2.0.0-alpha.5"),
                     ],
                 targets: [
                     // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -242,6 +242,7 @@ extension ServiceModelCodeGenerator {
             build
             .DS_Store
             .build/
+            .swiftpm/
             *.xcodeproj
             *~
             """)
