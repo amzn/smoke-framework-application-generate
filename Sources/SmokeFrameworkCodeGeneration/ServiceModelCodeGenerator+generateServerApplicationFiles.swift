@@ -88,10 +88,12 @@ extension ServiceModelCodeGenerator {
             import SmokeHTTP1
             import SmokeOperationsHTTP1
             import SmokeAWSCore
-            import LoggerAPI
+            import Logging
             
             func handleApplication() {
                 CloudwatchStandardErrorLogger.enableLogging()
+            
+                let applicationLogger = Logger(label: "\(baseName).application")
             
                 let operationsContext = \(baseName)OperationsContext()
             
@@ -105,7 +107,7 @@ extension ServiceModelCodeGenerator {
                         //       of the operationsContext.
                     }
                 } catch {
-                    Log.error("Unable to start Operations Server: '\\(error)'")
+                    applicationLogger.error("Unable to start Operations Server: '\\(error)'")
                 }
             }
             """)
@@ -129,13 +131,16 @@ extension ServiceModelCodeGenerator {
         }
         
         fileBuilder.appendLine("""
-            // swift-tools-version:4.2
+            // swift-tools-version:5.0
             // The swift-tools-version declares the minimum version of Swift required to build this package.
 
             import PackageDescription
 
             let package = Package(
                 name: "\(baseName)",
+                platforms: [
+                  .macOS(.v10_12), .iOS(.v10)
+                ],
                 products: [
                     // Products define the executables and libraries produced by a package, and make them visible to other packages.
                     .library(
@@ -155,9 +160,9 @@ extension ServiceModelCodeGenerator {
                         targets: ["\(baseName)\(applicationSuffix)"]),
                     ],
                 dependencies: [
-                    .package(url: "https://github.com/amzn/smoke-framework.git", .upToNextMajor(from: "1.0.0")),
-                    .package(url: "https://github.com/amzn/smoke-aws-credentials.git", .upToNextMajor(from: "1.0.0")),
-                    .package(url: "https://github.com/amzn/smoke-aws.git", .upToNextMajor(from: "1.0.0")),
+                    .package(url: "https://github.com/amzn/smoke-framework.git", .branch("1_x_compatible_server")),
+                    .package(url: "https://github.com/amzn/smoke-aws-credentials.git", from: "2.0.0-alpha.2"),
+                    .package(url: "https://github.com/amzn/smoke-aws.git", from: "2.0.0-alpha.4"),
                     ],
                 targets: [
                     // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -180,7 +185,8 @@ extension ServiceModelCodeGenerator {
                     .testTarget(
                         name: "\(baseName)OperationsTests",
                         dependencies: ["\(baseName)Operations"]),
-                    ]
+                    ],
+                    swiftLanguageVersions: [.v5]
             )
             """)
 

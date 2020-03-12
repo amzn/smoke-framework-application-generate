@@ -43,12 +43,16 @@ extension ServiceModelCodeGenerator {
             import SmokeOperationsHTTP1
             import \(baseName)Model
             import \(baseName)Operations
+            import SmokeOperations
             
             """)
         
         fileBuilder.appendLine("""
+            extension \(baseName)ModelOperations: OperationIdentity {}
+            
             public typealias HandlerSelectorType =
-                StandardSmokeHTTP1HandlerSelector<\(baseName)OperationsContext, JSONPayloadHTTP1OperationDelegate>
+                StandardSmokeHTTP1HandlerSelector<\(baseName)OperationsContext, \(baseName)OperationDelegate,
+                                                  \(baseName)ModelOperations>
             
             public func createHandlerSelector() -> HandlerSelectorType {
             """)
@@ -90,7 +94,7 @@ extension ServiceModelCodeGenerator {
     
     private func generateHandlerForOperation(name: String, operationDescription: OperationDescription,
                                              baseName: String, fileBuilder: FileBuilder) {
-        if let httpUrl = operationDescription.httpUrl, let httpMethod = operationDescription.httpVerb {
+        if let httpMethod = operationDescription.httpVerb {
             let sortedErrors = operationDescription.errors.sorted { entry1, entry2 in
                 return entry1.code < entry2.code
             }
@@ -107,12 +111,13 @@ extension ServiceModelCodeGenerator {
             }
             
             let operationFunctionName = "handle\(name.startingWithUppercase)"
+            let internalName = name.upperToLowerCamelCase
             
             fileBuilder.appendLine("""
                 
-                newHandler.addHandlerForUri("\(httpUrl)", httpMethod: .\(httpMethod),
-                                            operation: \(operationFunctionName),
-                                            allowedErrors: [\(allowedErrors)])
+                newHandler.addHandlerForOperation(.\(internalName), httpMethod: .\(httpMethod),
+                                                  operation: \(operationFunctionName),
+                                                  allowedErrors: [\(allowedErrors)])
                 """)
         }
     }

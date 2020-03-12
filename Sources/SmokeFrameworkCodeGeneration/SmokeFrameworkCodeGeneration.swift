@@ -30,8 +30,6 @@ public enum GenerationType: String {
 }
 
 public struct SmokeFrameworkCodeGeneration {
-    static let asyncResultType = AsyncResultType(typeName: "HTTPResult",
-                                                 libraryImport: "SmokeHTTPClient")
     
     public static func generateFromModel<ModelType: ServiceModel>(
         modelFilePath: String,
@@ -59,35 +57,35 @@ extension ServiceModelCodeGenerator {
     func generateFromModel<ModelType: ServiceModel>(serviceModel: ModelType,
                                                     generationType: GenerationType) throws {
         let clientProtocolDelegate = ClientProtocolDelegate(
-            baseName: applicationDescription.baseName,
-            asyncResultType: SmokeFrameworkCodeGeneration.asyncResultType)
+            baseName: applicationDescription.baseName)
         let mockClientDelegate = MockClientDelegate(
             baseName: applicationDescription.baseName,
-            isThrowingMock: false,
-            asyncResultType: SmokeFrameworkCodeGeneration.asyncResultType)
+            isThrowingMock: false)
         let throwingClientDelegate = MockClientDelegate(
             baseName: applicationDescription.baseName,
-            isThrowingMock: true,
-            asyncResultType: SmokeFrameworkCodeGeneration.asyncResultType)
+            isThrowingMock: true)
         let awsClientDelegate = APIGatewayClientDelegate(
-            baseName: applicationDescription.baseName,
-            asyncResultType: SmokeFrameworkCodeGeneration.asyncResultType,
+            baseName: applicationDescription.baseName, asyncResultType: nil,
             contentType: "application/json", signAllHeaders: false)
         let awsModelErrorsDelegate = SmokeFrameworkModelErrorsDelegate()
         
         generateServerOperationHandlerStubs(generationType: generationType)
         generateServerHanderSelector()
+        generateTraceContextType(generationType: generationType)
         generateServerApplicationFiles(generationType: generationType)
         generateOperationsContext(generationType: generationType)
         generateOperationTests(generationType: generationType)
         generateTestConfiguration(generationType: generationType)
         generateLinuxMain()
         
-        generateClient(delegate: clientProtocolDelegate)
-        generateClient(delegate: mockClientDelegate)
-        generateClient(delegate: throwingClientDelegate)
-        generateClient(delegate: awsClientDelegate)
+        generateClient(delegate: clientProtocolDelegate, isGenerator: false)
+        generateClient(delegate: mockClientDelegate, isGenerator: false)
+        generateClient(delegate: throwingClientDelegate, isGenerator: false)
+        generateClient(delegate: awsClientDelegate, isGenerator: false)
+        generateClient(delegate: awsClientDelegate, isGenerator: true)
         generateModelOperationsEnum()
+        generateOperationsReporting()
+        generateInvocationsReporting()
         generateModelOperationClientInput()
         generateModelOperationClientOutput()
         generateModelOperationHTTPInput()
