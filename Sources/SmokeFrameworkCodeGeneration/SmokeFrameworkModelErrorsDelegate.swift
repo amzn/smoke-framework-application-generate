@@ -33,17 +33,25 @@ struct SmokeFrameworkModelErrorsDelegate: ModelErrorsDelegate {
     
     func errorTypeAdditionalErrorIdentitiesGenerator(fileBuilder: FileBuilder,
                                                      errorTypes: [ErrorType]) {
-        // nothing to do
+         fileBuilder.appendLine("""
+         private let __validationErrorIdentity = "ValidationError"
+         private let __unrecognizedErrorIdentity = "UnrecognizedError"
+         private let __unknownErrorIdentity = "UnknownError"
+         """)
     }
     
     func errorTypeWillAddAdditionalCases(fileBuilder: FileBuilder,
                                          errorTypes: [ErrorType]) -> Int {
-        return 0
+        return 3
     }
     
     func errorTypeAdditionalErrorCasesGenerator(fileBuilder: FileBuilder,
                                                 errorTypes: [ErrorType]) {
-        // nothing to do
+        fileBuilder.appendLine("""
+        case validationError(reason: String)
+        case unrecognizedError(String, String?)
+        case unknownError
+        """)
     }
     
     func errorTypeCodingKeysGenerator(fileBuilder: FileBuilder,
@@ -51,6 +59,7 @@ struct SmokeFrameworkModelErrorsDelegate: ModelErrorsDelegate {
         fileBuilder.appendLine("""
         enum CodingKeys: String, CodingKey {
             case type = "__type"
+            case unrecognizedType = "__unrecognizedType"
             case errorMessage = "message"
         }
         """)
@@ -74,5 +83,32 @@ struct SmokeFrameworkModelErrorsDelegate: ModelErrorsDelegate {
     func errorTypeAdditionalErrorDecodeStatementsGenerator(fileBuilder: FileBuilder,
                                                            errorTypes: [ErrorType]) {
         // nothing to do
+    }
+    
+    func errorTypeAdditionalErrorEncodeStatementsGenerator(fileBuilder: FileBuilder,
+                                                           errorTypes: [ErrorType]) {
+        fileBuilder.appendLine("""
+            case .validationError(reason: let reason):
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                try container.encode(reason, forKey: .errorMessage)
+            case .unrecognizedError(let errorReason, let errorMessage):
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                try container.encode(errorReason, forKey: .unrecognizedType)
+                try container.encode(errorMessage, forKey: .errorMessage)
+            case .unknownError:
+                break
+            """)
+    }
+    
+    func errorTypeAdditionalDescriptionCases(fileBuilder: FileBuilder,
+                                             errorTypes: [ErrorType]) {
+        fileBuilder.appendLine("""
+            case .validationError:
+                return __validationErrorIdentity
+            case .unrecognizedError:
+                return __unrecognizedErrorIdentity
+            case .unknownError:
+                return __unknownErrorIdentity
+            """)
     }
 }
