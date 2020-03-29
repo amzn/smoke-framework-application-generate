@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/amzn/service-model-swift-code-generate.git",
         "state": {
           "branch": null,
-          "revision": "7bea0be0b12cca3c9d37987ff957a529ec35f644",
-          "version": "2.0.0-alpha.2"
+          "revision": "734498f7a49db9a586b2c924f41cf6b1a81659ba",
+          "version": "2.0.0-alpha.3"
         }
       },
       {
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/amzn/smoke-aws-generate.git",
         "state": {
           "branch": null,
-          "revision": "83bc0e7d34aadcc9fe9be53a0416b24283a14260",
-          "version": "2.0.0-alpha.2"
+          "revision": "e72f8061261c0f1885c63865f89eca95f825a5d2",
+          "version": "2.0.0-alpha.4"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/tachyonics/SwaggerParser.git",
         "state": {
           "branch": null,
-          "revision": "043d807776630b4681e646106b48cefe739a5a31",
-          "version": "0.6.3"
+          "revision": "c0eb70485c59a9d7dd6765dcd303b49fdb3040ee",
+          "version": "0.6.4"
         }
       },
       {
