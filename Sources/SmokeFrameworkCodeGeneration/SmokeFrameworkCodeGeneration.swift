@@ -74,6 +74,7 @@ extension ServiceModelCodeGenerator {
         generateTraceContextType(generationType: generationType)
         generateServerApplicationFiles(generationType: generationType)
         generateOperationsContext(generationType: generationType)
+        generateOperationsContextGenerator(generationType: generationType)
         generateOperationTests(generationType: generationType)
         generateTestConfiguration(generationType: generationType)
         generateLinuxMain()

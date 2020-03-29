@@ -11,7 +11,7 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  ServiceModelCodeGenerator+generateTestConfiguration.swift
+//  ServiceModelCodeGenerator+generateOperationsContextGenerator.swift
 //  SmokeFrameworkCodeGeneration
 //
 
@@ -19,15 +19,17 @@ import Foundation
 import ServiceModelCodeGeneration
 
 extension ServiceModelCodeGenerator {
-
-    func generateTestConfiguration(generationType: GenerationType) {
+    /**
+     Generate the stub operations context generator for the generated application.
+     */
+    func generateOperationsContextGenerator(generationType: GenerationType) {
         
         let fileBuilder = FileBuilder()
         let baseName = applicationDescription.baseName
         let baseFilePath = applicationDescription.baseFilePath
         
-        let fileName = "\(baseName)TestConfiguration.swift"
-        let filePath = "\(baseFilePath)/Tests/\(baseName)OperationsTests"
+        let fileName = "\(baseName)OperationsContextGenerator.swift"
+        let filePath = "\(baseFilePath)/Sources/\(baseName)OperationsHTTP1"
         
         if case .serverUpdate = generationType {
             guard !FileManager.default.fileExists(atPath: "\(filePath)/\(fileName)") else {
@@ -37,21 +39,28 @@ extension ServiceModelCodeGenerator {
         
         fileBuilder.appendLine("""
             //
-            // \(baseName)TestConfiguration.swift
-            // \(baseName)OperationsTests
+            // \(baseName)OperationsContextGenerator.swift
+            // \(baseName)OperationsHTTP1
             //
             
-            import XCTest
-            @testable import \(baseName)Operations
-            import \(baseName)Model
+            import Foundation
+            import \(baseName)Operations
+            import SmokeOperations
+            import SmokeOperationsHTTP1
             import Logging
             
-            struct TestVariables {
-                static let logger = Logger(label: "\(baseName)TestConfiguration")
-            }
+            /**
+             Per-invocation generator for the context to be passed to each of the \(baseName) operations.
+             */
+            public struct \(baseName)OperationsContextGenerator {
+                // TODO: Add properties to be accessed by the operation handlers
             
-            func createOperationsContext() -> \(baseName)OperationsContext {
-                return \(baseName)OperationsContext(logger: TestVariables.logger)
+                public init() {
+                }
+            
+                public func get(invocationReporting: SmokeServerInvocationReporting<SmokeInvocationTraceContext>) -> \(baseName)OperationsContext {
+                    return \(baseName)OperationsContext(logger: invocationReporting.logger)
+                }
             }
             """)
         

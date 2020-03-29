@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/amzn/service-model-swift-code-generate.git",
         "state": {
           "branch": null,
-          "revision": "7bea0be0b12cca3c9d37987ff957a529ec35f644",
-          "version": "2.0.0-alpha.2"
+          "revision": "734498f7a49db9a586b2c924f41cf6b1a81659ba",
+          "version": "2.0.0-alpha.3"
         }
       },
       {
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/amzn/smoke-aws-generate.git",
         "state": {
           "branch": null,
-          "revision": "8fd5fbfdc5233241e7f62a5f76a983bcd59e8a07",
-          "version": "2.0.0-alpha.3"
+          "revision": "e72f8061261c0f1885c63865f89eca95f825a5d2",
+          "version": "2.0.0-alpha.4"
         }
       },
       {
