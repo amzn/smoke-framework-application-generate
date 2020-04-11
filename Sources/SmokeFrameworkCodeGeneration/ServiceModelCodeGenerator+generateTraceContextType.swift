@@ -49,7 +49,7 @@ extension ServiceModelCodeGenerator {
             //
             
             import Foundation
-            import SmokeOperationsHTTP1
+            import SmokeOperationsHTTP1Server
             
             /**
              Customizing this typealias allows an application to affect how the SmokeFramework handles incoming
