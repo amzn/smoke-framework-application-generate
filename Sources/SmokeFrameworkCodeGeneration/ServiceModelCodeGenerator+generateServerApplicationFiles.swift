@@ -86,7 +86,7 @@ extension ServiceModelCodeGenerator {
             import \(baseName)OperationsHTTP1
             import \(baseName)Operations
             import SmokeHTTP1
-            import SmokeOperationsHTTP1
+            import SmokeOperationsHTTP1Server
             import SmokeAWSCore
             import Logging
             
@@ -131,7 +131,7 @@ extension ServiceModelCodeGenerator {
         }
         
         fileBuilder.appendLine("""
-            // swift-tools-version:5.0
+            // swift-tools-version:5.2
             // The swift-tools-version declares the minimum version of Swift required to build this package.
 
             import PackageDescription
@@ -139,7 +139,7 @@ extension ServiceModelCodeGenerator {
             let package = Package(
                 name: "\(baseName)",
                 platforms: [
-                  .macOS(.v10_12), .iOS(.v10)
+                  .macOS(.v10_15), .iOS(.v10)
                 ],
                 products: [
                     // Products define the executables and libraries produced by a package, and make them visible to other packages.
@@ -160,31 +160,43 @@ extension ServiceModelCodeGenerator {
                         targets: ["\(baseName)\(applicationSuffix)"]),
                     ],
                 dependencies: [
-                    .package(url: "https://github.com/amzn/smoke-framework.git", from: "2.0.0-alpha.5"),
-                    .package(url: "https://github.com/amzn/smoke-aws-credentials.git", from: "2.0.0-alpha.4"),
-                    .package(url: "https://github.com/amzn/smoke-aws.git", from: "2.0.0-alpha.5"),
+                    .package(url: "https://github.com/amzn/smoke-framework.git", .branch("5_2_manifest")),
+                    .package(url: "https://github.com/amzn/smoke-aws-credentials.git", .branch("use_swift_crypto_under_5_2")),
+                    .package(url: "https://github.com/amzn/smoke-aws.git", from: "2.0.0-alpha.6"),
+                    .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
                     ],
                 targets: [
                     // Targets are the basic building blocks of a package. A target can define a module or a test suite.
                     // Targets can depend on other targets in this package, and on products in packages which this package depends on.
                     .target(
-                        name: "\(baseName)Model",
-                        dependencies: ["SmokeOperations"]),
+                        name: "\(baseName)Model", dependencies: [
+                            .product(name: "SmokeOperations", package: "smoke-framework"),
+                            .product(name: "Logging", package: "swift-log"),
+                        ]),
                     .target(
-                        name: "\(baseName)Operations",
-                        dependencies: ["\(baseName)Model"]),
+                        name: "\(baseName)Operations", dependencies: [
+                            .target(name: "\(baseName)Model"),
+                        ]),
                     .target(
-                        name: "\(baseName)OperationsHTTP1",
-                        dependencies: ["\(baseName)Operations", "SmokeOperationsHTTP1"]),
+                        name: "\(baseName)OperationsHTTP1", dependencies: [
+                            .target(name: "\(baseName)Operations"),
+                            .product(name: "SmokeOperationsHTTP1Server", package: "smoke-framework"),
+                        ]),
                     .target(
-                        name: "\(baseName)Client",
-                        dependencies: ["\(baseName)Model", "SmokeOperationsHTTP1", "SmokeAWSHttp"]),
+                        name: "\(baseName)Client", dependencies: [
+                            .target(name: "\(baseName)Model"),
+                            .product(name: "SmokeOperationsHTTP1", package: "smoke-framework"),
+                            .product(name: "SmokeAWSHttp", package: "smoke-aws"),
+                        ]),
                     .target(
-                        name: "\(baseName)\(applicationSuffix)",
-                        dependencies: ["\(baseName)OperationsHTTP1", "SmokeAWSCredentials"]),
+                        name: "\(baseName)\(applicationSuffix)", dependencies: [
+                            .target(name: "\(baseName)OperationsHTTP1"),
+                            .product(name: "SmokeAWSCredentials", package: "smoke-aws-credentials"),
+                        ]),
                     .testTarget(
-                        name: "\(baseName)OperationsTests",
-                        dependencies: ["\(baseName)Operations"]),
+                        name: "\(baseName)OperationsTests", dependencies: [
+                            .target(name: "\(baseName)Operations"),
+                        ]),
                     ],
                     swiftLanguageVersions: [.v5]
             )

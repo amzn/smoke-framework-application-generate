@@ -46,7 +46,7 @@ extension ServiceModelCodeGenerator {
             import Foundation
             import \(baseName)Operations
             import SmokeOperations
-            import SmokeOperationsHTTP1
+            import SmokeOperationsHTTP1Server
             import Logging
             
             /**
