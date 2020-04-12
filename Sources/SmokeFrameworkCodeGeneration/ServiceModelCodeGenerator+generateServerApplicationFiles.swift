@@ -24,7 +24,6 @@ extension ServiceModelCodeGenerator {
      Generate the main Swift file for the generated application as a Container Server.
      */
     func generateServerApplicationFiles(generationType: GenerationType) {
-        generateContainerServerApplicationHelper(generationType: generationType)
         generateContainerServerApplicationMain(generationType: generationType)
         generatePackageFile(generationType: generationType)
         generateLintFile(generationType: generationType)
@@ -53,64 +52,10 @@ extension ServiceModelCodeGenerator {
             // \(baseName)\(applicationSuffix)
             //
             
-            import Foundation
-            
-            handleApplication()
-            """)
-        
-        fileBuilder.write(toFile: fileName, atFilePath: filePath)
-    }
-
-    private func generateContainerServerApplicationHelper(generationType: GenerationType) {
-        
-        let fileBuilder = FileBuilder()
-        let baseName = applicationDescription.baseName
-        let baseFilePath = applicationDescription.baseFilePath
-        let applicationSuffix = applicationDescription.applicationSuffix
-        
-        let fileName = "\(baseName)\(applicationSuffix).swift"
-        let filePath = "\(baseFilePath)/Sources/\(baseName)\(applicationSuffix)"
-        
-        if case .serverUpdate = generationType {
-            guard !FileManager.default.fileExists(atPath: "\(filePath)/\(fileName)") else {
-                return
-            }
-        }
-        
-        fileBuilder.appendLine("""
-            //
-            // \(baseName)\(applicationSuffix).swift
-            // \(baseName)\(applicationSuffix)
-            //
-            
-            import Foundation
-            import \(baseName)OperationsHTTP1
-            import \(baseName)Operations
             import SmokeHTTP1
             import SmokeOperationsHTTP1Server
-            import SmokeAWSCore
-            import Logging
             
-            func handleApplication() {
-                CloudwatchStandardErrorLogger.enableLogging()
-            
-                let applicationLogger = Logger(label: "\(baseName).application")
-            
-                let operationsContextGenerator = \(baseName)OperationsContextGenerator()
-            
-                do {
-                    let smokeHTTP1Server = try SmokeHTTP1Server.startAsOperationServer(
-                        withHandlerSelector: createHandlerSelector(),
-                        andContextProvider: operationsContextGenerator.get)
-            
-                    try smokeHTTP1Server.waitUntilShutdownAndThen {
-                        // TODO: Close/shutdown any clients or credentials that are part
-                        //       of the operationsContext.
-                    }
-                } catch {
-                    applicationLogger.error("Unable to start Operations Server: '\\(error)'")
-                }
-            }
+            SmokeHTTP1Server.runAsOperationServer(\(baseName)PerInvocationContextInitializer.init)
             """)
         
         fileBuilder.write(toFile: fileName, atFilePath: filePath)
@@ -161,7 +106,7 @@ extension ServiceModelCodeGenerator {
                         targets: ["\(baseName)\(applicationSuffix)"]),
                     ],
                 dependencies: [
-                    .package(url: "https://github.com/amzn/smoke-framework.git", .branch("5_2_manifest")),
+                    .package(url: "https://github.com/amzn/smoke-framework.git", .branch("initializers")),
                     .package(url: "https://github.com/amzn/smoke-aws-credentials.git", .branch("use_swift_crypto_under_5_2")),
                     .package(url: "https://github.com/amzn/smoke-aws.git", from: "2.0.0-alpha.6"),
                     .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
@@ -181,7 +126,7 @@ extension ServiceModelCodeGenerator {
                     .target(
                         name: "\(baseName)OperationsHTTP1", dependencies: [
                             .target(name: "\(baseName)Operations"),
-                            .product(name: "SmokeOperationsHTTP1Server", package: "smoke-framework"),
+                            .product(name: "SmokeOperationsHTTP1", package: "smoke-framework"),
                         ]),
                     .target(
                         name: "\(baseName)Client", dependencies: [
@@ -193,6 +138,7 @@ extension ServiceModelCodeGenerator {
                         name: "\(baseName)\(applicationSuffix)", dependencies: [
                             .target(name: "\(baseName)OperationsHTTP1"),
                             .product(name: "SmokeAWSCredentials", package: "smoke-aws-credentials"),
+                            .product(name: "SmokeOperationsHTTP1Server", package: "smoke-framework"),
                         ]),
                     .testTarget(
                         name: "\(baseName)OperationsTests", dependencies: [

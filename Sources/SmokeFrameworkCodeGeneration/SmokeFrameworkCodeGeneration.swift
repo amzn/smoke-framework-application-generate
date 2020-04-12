@@ -71,7 +71,6 @@ extension ServiceModelCodeGenerator {
         
         generateServerOperationHandlerStubs(generationType: generationType)
         generateServerHanderSelector()
-        generateTraceContextType(generationType: generationType)
         generateServerApplicationFiles(generationType: generationType)
         generateOperationsContext(generationType: generationType)
         generateOperationsContextGenerator(generationType: generationType)
