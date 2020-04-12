@@ -40,35 +40,22 @@ extension ServiceModelCodeGenerator {
             //
             
             import Foundation
-            import SmokeOperationsHTTP1
-            import SmokeOperationsHTTP1Server
             import \(baseName)Model
             import \(baseName)Operations
             import SmokeOperations
+            import SmokeOperationsHTTP1
             
             """)
         
         fileBuilder.appendLine("""
             extension \(baseName)ModelOperations: OperationIdentity {}
             
-            public typealias HandlerSelectorType =
-                StandardSmokeHTTP1HandlerSelector<\(baseName)OperationsContext, \(baseName)OperationDelegate,
-                                                  \(baseName)ModelOperations>
-            
-            public func createHandlerSelector() -> HandlerSelectorType {
+            public func addOperations<SelectorType: SmokeHTTP1HandlerSelector>(selector: inout SelectorType)
+                where SelectorType.ContextType == \(baseName)OperationsContext,
+                SelectorType.OperationIdentifer == \(baseName)ModelOperations {
             """)
         
         fileBuilder.incIndent()
-        
-        if model.operationDescriptions.isEmpty {
-            fileBuilder.appendLine("""
-                return HandlerSelectorType()
-                """)
-        } else {
-            fileBuilder.appendLine("""
-                var newHandler = HandlerSelectorType(defaultOperationDelegate: JSONPayloadHTTP1OperationDelegate())
-                """)
-        }
         
         // sort the operations in alphabetical order for output
         let sortedOperations = model.operationDescriptions.sorted { entry1, entry2 in
@@ -78,12 +65,6 @@ extension ServiceModelCodeGenerator {
         // iterate through the operations
         for entry in sortedOperations {
             generateHandlerForOperation(name: entry.key, operationDescription: entry.value, baseName: baseName, fileBuilder: fileBuilder)
-        }
-        
-        if !model.operationDescriptions.isEmpty {
-            fileBuilder.appendLine("""
-                return newHandler
-                """)
         }
         
         fileBuilder.decIndent()
@@ -116,9 +97,9 @@ extension ServiceModelCodeGenerator {
             
             fileBuilder.appendLine("""
                 
-                newHandler.addHandlerForOperation(.\(internalName), httpMethod: .\(httpMethod),
-                                                  operation: \(operationFunctionName),
-                                                  allowedErrors: [\(allowedErrors)])
+                selector.addHandlerForOperation(.\(internalName), httpMethod: .\(httpMethod),
+                                                operation: \(operationFunctionName),
+                                                allowedErrors: [\(allowedErrors)])
                 """)
         }
     }
