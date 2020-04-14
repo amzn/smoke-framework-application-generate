@@ -7,7 +7,7 @@
         "state": {
           "branch": null,
           "revision": "734498f7a49db9a586b2c924f41cf6b1a81659ba",
-          "version": "2.0.0-alpha.3"
+          "version": "2.0.0-beta.1"
         }
       },
       {
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/amzn/smoke-aws-generate.git",
         "state": {
           "branch": null,
-          "revision": "ea5ebe6b607fe0f64040447af49652d268a4950f",
-          "version": "2.0.0-alpha.5"
+          "revision": "c827136894f5c9a1b9fe0c4b46bf4825db29bcf1",
+          "version": "2.0.0-beta.1"
         }
       },
       {
