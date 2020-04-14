@@ -106,9 +106,9 @@ extension ServiceModelCodeGenerator {
                         targets: ["\(baseName)\(applicationSuffix)"]),
                     ],
                 dependencies: [
-                    .package(url: "https://github.com/amzn/smoke-framework.git", .branch("initializers")),
-                    .package(url: "https://github.com/amzn/smoke-aws-credentials.git", .branch("use_swift_crypto_under_5_2")),
-                    .package(url: "https://github.com/amzn/smoke-aws.git", from: "2.0.0-alpha.6"),
+                    .package(url: "https://github.com/amzn/smoke-framework.git", from: "2.0.0-beta.1"),
+                    .package(url: "https://github.com/amzn/smoke-aws-credentials.git", from: "2.0.0-beta.1"),
+                    .package(url: "https://github.com/amzn/smoke-aws.git", from: "2.0.0-beta.1"),
                     .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
                     ],
                 targets: [
