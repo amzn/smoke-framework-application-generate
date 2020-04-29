@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/amzn/smoke-aws-generate.git",
         "state": {
           "branch": null,
-          "revision": "c827136894f5c9a1b9fe0c4b46bf4825db29bcf1",
-          "version": "2.0.0-beta.1"
+          "revision": "37d21999ed8e87f5a58741e5d69e3afd0d4ecc21",
+          "version": "2.0.0-beta.3"
         }
       },
       {
