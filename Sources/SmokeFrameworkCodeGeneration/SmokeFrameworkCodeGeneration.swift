@@ -66,7 +66,8 @@ extension ServiceModelCodeGenerator {
             isThrowingMock: true)
         let awsClientDelegate = APIGatewayClientDelegate(
             baseName: applicationDescription.baseName, asyncResultType: nil,
-            contentType: "application/json", signAllHeaders: false)
+            contentType: "application/json", signAllHeaders: false,
+            defaultInvocationTraceContext: InvocationTraceContextDeclaration(name: "SmokeInvocationTraceContext", importPackage: "SmokeOperationsHTTP1"))
         let awsModelErrorsDelegate = SmokeFrameworkModelErrorsDelegate()
         
         generateServerOperationHandlerStubs(generationType: generationType)
