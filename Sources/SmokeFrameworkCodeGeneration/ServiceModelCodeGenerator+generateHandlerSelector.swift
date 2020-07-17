@@ -29,12 +29,10 @@ extension ServiceModelCodeGenerator {
         let baseName = applicationDescription.baseName
         let baseFilePath = applicationDescription.baseFilePath
         
+        addGeneratedFileHeader(fileBuilder: fileBuilder)
+        
         // build a map of http url to operation handler
         fileBuilder.appendLine("""
-            // swiftlint:disable superfluous_disable_command
-            // swiftlint:disable file_length line_length identifier_name type_name vertical_parameter_alignment
-            // -- Generated Code; do not edit --
-            //
             // \(baseName)OperationsHanderSelector.swift
             // \(baseName)OperationsHTTP1
             //
