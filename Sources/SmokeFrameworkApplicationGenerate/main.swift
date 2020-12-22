@@ -182,7 +182,7 @@ private func startCodeGeneration(
         validationErrorDeclaration: validationErrorDeclaration,
         unrecognizedErrorDeclaration: unrecognizedErrorDeclaration,
         generateModelShapeConversions: true,
-        optionalsInitializeEmpty: false,
+        optionalsInitializeEmpty: true,
         fileHeader: nil,
         httpClientConfiguration: httpClientConfiguration)
     
