@@ -43,7 +43,8 @@ public enum OperationStubGenerationRule: Codable {
     
     enum CodingKeys: String, CodingKey {
         case mode
-        case exceptions
+        case operationsWithStandaloneFunctions
+        case operationsWithFunctionsWithinContext
     }
     
     enum Mode: String, Codable {
@@ -89,10 +90,10 @@ public enum OperationStubGenerationRule: Codable {
         case .allStandaloneFunctions:
             self = .allStandaloneFunctions
         case .allFunctionsWithinContextExceptForSpecifiedStandaloneFunctions:
-            let exceptions = try values.decode([String].self, forKey: .exceptions)
+            let exceptions = try values.decode([String].self, forKey: .operationsWithStandaloneFunctions)
             self = .allFunctionsWithinContextExceptStandaloneFunctionsFor(exceptions)
         case .allStandaloneFunctionsExceptForSpecifiedFunctionsWithinContext:
-            let exceptions = try values.decode([String].self, forKey: .exceptions)
+            let exceptions = try values.decode([String].self, forKey: .operationsWithFunctionsWithinContext)
             self = .allStandaloneFunctionsExceptFunctionsWithinContextFor(exceptions)
         }
     }
@@ -103,9 +104,9 @@ public enum OperationStubGenerationRule: Codable {
         
         switch self {
         case .allFunctionsWithinContextExceptStandaloneFunctionsFor(let whitelist):
-            try container.encode(whitelist, forKey: .exceptions)
+            try container.encode(whitelist, forKey: .operationsWithStandaloneFunctions)
         case .allStandaloneFunctionsExceptFunctionsWithinContextFor(let whitelist):
-            try container.encode(whitelist, forKey: .exceptions)
+            try container.encode(whitelist, forKey: .operationsWithFunctionsWithinContext)
         case .allFunctionsWithinContext, .allStandaloneFunctions:
             break
         }
