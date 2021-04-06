@@ -21,7 +21,8 @@ import ServiceModelEntities
 
 extension ServiceModelCodeGenerator {
     private func generateExampleTestCase(operationDescription: OperationDescription, name: String,
-                                         input: String, fileBuilder: FileBuilder) {
+                                         input: String, fileBuilder: FileBuilder,
+                                         operationStubGeneration: OperationStubGeneration) {
         let tryPrefix = !operationDescription.errors.isEmpty ? "try " : ""
         
         // append the body of the test for this operation.
@@ -32,24 +33,38 @@ extension ServiceModelCodeGenerator {
             
             """)
         
-        if let output = operationDescription.output {
-            fileBuilder.appendLine("""
-                    XCTAssertEqual(\(tryPrefix)handle\(name)(input: input, context: operationsContext),
-                    \(output).__default)
-                }
-                """)
-        } else {
-            fileBuilder.appendLine("""
-                    XCTAssertNoThrow(\(tryPrefix)handle\(name)(input: input, context: operationsContext))
-                }
-                """)
+        switch operationStubGeneration {
+        case .functionWithinContext:
+            if let output = operationDescription.output {
+                fileBuilder.appendLine("""
+                        XCTAssertEqual(\(tryPrefix)operationsContext.handle\(name)(input: input), \(output).__default)
+                    }
+                    """)
+            } else {
+                fileBuilder.appendLine("""
+                        XCTAssertNoThrow(\(tryPrefix)operationsContext.handle\(name)(input: input))
+                    }
+                    """)
+            }
+        case .standaloneFunction:
+            if let output = operationDescription.output {
+                fileBuilder.appendLine("""
+                        XCTAssertEqual(\(tryPrefix)handle\(name)(input: input, context: operationsContext), \(output).__default)
+                    }
+                    """)
+            } else {
+                fileBuilder.appendLine("""
+                        XCTAssertNoThrow(\(tryPrefix)handle\(name)(input: input, context: operationsContext))
+                    }
+                    """)
+            }
         }
     }
     
     /**
      Generate the example operation unit tests for the generated application.
      */
-    func generateOperationTests(generationType: GenerationType) {
+    func generateOperationTests(generationType: GenerationType, operationStubGenerationRule: OperationStubGenerationRule) {
         let baseName = applicationDescription.baseName
         let baseFilePath = applicationDescription.baseFilePath
         let filePath = "\(baseFilePath)/Tests/\(baseName)OperationsTests"
@@ -89,7 +104,9 @@ extension ServiceModelCodeGenerator {
             
             fileBuilder.incIndent()
             
-            generateExampleTestCase(operationDescription: operationDescription, name: name, input: input, fileBuilder: fileBuilder)
+            let operationStubGeneration = operationStubGenerationRule.getStubGeneration(forOperation: operationName)
+            generateExampleTestCase(operationDescription: operationDescription, name: name, input: input,
+                                    fileBuilder: fileBuilder, operationStubGeneration: operationStubGeneration)
         
             // append the allTests list
             fileBuilder.appendEmptyLine()

@@ -20,13 +20,96 @@ import ServiceModelCodeGeneration
 import ServiceModelEntities
 import ServiceModelGenerate
 import SmokeAWSModelGenerate
+import ArgumentParser
 
 /**
  The supported generation types.
  */
-public enum GenerationType: String {
+public enum GenerationType: String, Codable, ExpressibleByArgument {
     case server
-    case serverUpdate = "serverupdate"
+    case serverUpdate
+}
+
+public enum OperationStubGeneration {
+    case functionWithinContext
+    case standaloneFunction
+}
+
+public enum OperationStubGenerationRule: Codable {
+    case allFunctionsWithinContext
+    case allStandaloneFunctions
+    case allFunctionsWithinContextExceptStandaloneFunctionsFor([String])
+    case allStandaloneFunctionsExceptFunctionsWithinContextFor([String])
+    
+    enum CodingKeys: String, CodingKey {
+        case mode
+        case exceptions
+    }
+    
+    enum Mode: String, Codable {
+        case allFunctionsWithinContext
+        case allStandaloneFunctions
+        case allFunctionsWithinContextExceptForSpecifiedStandaloneFunctions
+        case allStandaloneFunctionsExceptForSpecifiedFunctionsWithinContext
+    }
+    
+    var mode: Mode {
+        switch self {
+        case .allFunctionsWithinContext:
+            return .allFunctionsWithinContext
+        case .allStandaloneFunctions:
+            return .allStandaloneFunctions
+        case .allFunctionsWithinContextExceptStandaloneFunctionsFor:
+            return .allFunctionsWithinContextExceptForSpecifiedStandaloneFunctions
+        case .allStandaloneFunctionsExceptFunctionsWithinContextFor:
+            return .allStandaloneFunctionsExceptForSpecifiedFunctionsWithinContext
+        }
+    }
+    
+    public func getStubGeneration(forOperation operation: String) -> OperationStubGeneration {
+        switch self {
+        case .allFunctionsWithinContext:
+            return .functionWithinContext
+        case .allStandaloneFunctions:
+            return .standaloneFunction
+        case .allFunctionsWithinContextExceptStandaloneFunctionsFor(let whitelist):
+            return whitelist.contains(operation) ? .standaloneFunction : .functionWithinContext
+        case .allStandaloneFunctionsExceptFunctionsWithinContextFor(let whitelist):
+            return whitelist.contains(operation) ? .functionWithinContext : .standaloneFunction
+        }
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        let mode = try values.decode(Mode.self, forKey: .mode)
+        
+        switch mode {
+        case .allFunctionsWithinContext:
+            self = .allFunctionsWithinContext
+        case .allStandaloneFunctions:
+            self = .allStandaloneFunctions
+        case .allFunctionsWithinContextExceptForSpecifiedStandaloneFunctions:
+            let exceptions = try values.decode([String].self, forKey: .exceptions)
+            self = .allFunctionsWithinContextExceptStandaloneFunctionsFor(exceptions)
+        case .allStandaloneFunctionsExceptForSpecifiedFunctionsWithinContext:
+            let exceptions = try values.decode([String].self, forKey: .exceptions)
+            self = .allStandaloneFunctionsExceptFunctionsWithinContextFor(exceptions)
+        }
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(self.mode, forKey: .mode)
+        
+        switch self {
+        case .allFunctionsWithinContextExceptStandaloneFunctionsFor(let whitelist):
+            try container.encode(whitelist, forKey: .exceptions)
+        case .allStandaloneFunctionsExceptFunctionsWithinContextFor(let whitelist):
+            try container.encode(whitelist, forKey: .exceptions)
+        case .allFunctionsWithinContext, .allStandaloneFunctions:
+            break
+        }
+    }
 }
 
 public struct SmokeFrameworkCodeGeneration {
@@ -37,13 +120,15 @@ public struct SmokeFrameworkCodeGeneration {
         generationType: GenerationType,
         customizations: CodeGenerationCustomizations,
         applicationDescription: ApplicationDescription,
-        modelOverride: ModelOverride?) throws {
+        operationStubGenerationRule: OperationStubGenerationRule,
+        modelOverride: ModelOverride?) throws -> ModelType {
             func generatorFunction(codeGenerator: ServiceModelCodeGenerator,
                                    serviceModel: ModelType) throws {
-                try codeGenerator.generateFromModel(serviceModel: serviceModel, generationType: generationType)
+                try codeGenerator.generateFromModel(serviceModel: serviceModel, generationType: generationType,
+                                                    operationStubGenerationRule: operationStubGenerationRule)
             }
         
-            try ServiceModelGenerate.generateFromModel(
+            return try ServiceModelGenerate.generateFromModel(
                     modelFilePath: modelFilePath,
                     customizations: customizations,
                     applicationDescription: applicationDescription,
@@ -55,7 +140,8 @@ public struct SmokeFrameworkCodeGeneration {
 extension ServiceModelCodeGenerator {
     
     func generateFromModel<ModelType: ServiceModel>(serviceModel: ModelType,
-                                                    generationType: GenerationType) throws {
+                                                    generationType: GenerationType,
+                                                    operationStubGenerationRule: OperationStubGenerationRule) throws {
         let clientProtocolDelegate = ClientProtocolDelegate(
             baseName: applicationDescription.baseName)
         let mockClientDelegate = MockClientDelegate(
@@ -70,12 +156,12 @@ extension ServiceModelCodeGenerator {
             defaultInvocationTraceContext: InvocationTraceContextDeclaration(name: "SmokeInvocationTraceContext", importPackage: "SmokeOperationsHTTP1"))
         let awsModelErrorsDelegate = SmokeFrameworkModelErrorsDelegate()
         
-        generateServerOperationHandlerStubs(generationType: generationType)
-        generateServerHanderSelector()
+        generateServerOperationHandlerStubs(generationType: generationType, operationStubGenerationRule: operationStubGenerationRule)
+        generateServerHanderSelector(operationStubGenerationRule: operationStubGenerationRule)
         generateServerApplicationFiles(generationType: generationType)
         generateOperationsContext(generationType: generationType)
         generateOperationsContextGenerator(generationType: generationType)
-        generateOperationTests(generationType: generationType)
+        generateOperationTests(generationType: generationType, operationStubGenerationRule: operationStubGenerationRule)
         generateTestConfiguration(generationType: generationType)
         generateLinuxMain()
         
