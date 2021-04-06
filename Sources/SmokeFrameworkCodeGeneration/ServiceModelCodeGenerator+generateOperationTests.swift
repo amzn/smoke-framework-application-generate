@@ -27,20 +27,20 @@ extension ServiceModelCodeGenerator {
         // append the body of the test for this operation.
         fileBuilder.appendLine("""
             func test\(name)() {
-            let input = \(input).__default
-            let operationsContext = createOperationsContext()
+                let input = \(input).__default
+                let operationsContext = createOperationsContext()
             
             """)
         
         if let output = operationDescription.output {
             fileBuilder.appendLine("""
-                XCTAssertEqual(\(tryPrefix)handle\(name)(input: input, context: operationsContext),
-                \(output).__default)
+                    XCTAssertEqual(\(tryPrefix)handle\(name)(input: input, context: operationsContext),
+                    \(output).__default)
                 }
                 """)
         } else {
             fileBuilder.appendLine("""
-                XCTAssertNoThrow(\(tryPrefix)handle\(name)(input: input, context: operationsContext))
+                    XCTAssertNoThrow(\(tryPrefix)handle\(name)(input: input, context: operationsContext))
                 }
                 """)
         }
