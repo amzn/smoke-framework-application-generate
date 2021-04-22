@@ -23,7 +23,7 @@ extension ServiceModelCodeGenerator {
     /**
      Generate the hander selector for the operation handlers for the generated application.
      */
-    func generateServerHanderSelector() {
+    func generateServerHanderSelector(operationStubGenerationRule: OperationStubGenerationRule) {
         
         let fileBuilder = FileBuilder()
         let baseName = applicationDescription.baseName
@@ -62,7 +62,8 @@ extension ServiceModelCodeGenerator {
         
         // iterate through the operations
         for entry in sortedOperations {
-            generateHandlerForOperation(name: entry.key, operationDescription: entry.value, baseName: baseName, fileBuilder: fileBuilder)
+            generateHandlerForOperation(name: entry.key, operationDescription: entry.value, baseName: baseName,
+                                        fileBuilder: fileBuilder, operationStubGenerationRule: operationStubGenerationRule)
         }
         
         fileBuilder.decIndent()
@@ -73,7 +74,8 @@ extension ServiceModelCodeGenerator {
     }
     
     private func generateHandlerForOperation(name: String, operationDescription: OperationDescription,
-                                             baseName: String, fileBuilder: FileBuilder) {
+                                             baseName: String, fileBuilder: FileBuilder,
+                                             operationStubGenerationRule: OperationStubGenerationRule) {
         if let httpMethod = operationDescription.httpVerb {
             let sortedErrors = operationDescription.errors.sorted { entry1, entry2 in
                 return entry1.code < entry2.code
@@ -84,21 +86,35 @@ extension ServiceModelCodeGenerator {
                 let errorName = error.type.normalizedErrorName
                 
                 if index == 0 {
-                    allowedErrors += "(\(baseName)ErrorTypes.\(errorName), \(error.code))"
+                    allowedErrors += "(.\(errorName), \(error.code))"
                 } else {
-                    allowedErrors += ", (\(baseName)ErrorTypes.\(errorName), \(error.code))"
+                    allowedErrors += ", (.\(errorName), \(error.code))"
                 }
             }
             
-            let operationFunctionName = "handle\(name.startingWithUppercase)"
+            let operationStubGeneration = operationStubGenerationRule.getStubGeneration(forOperation: name)
+
             let internalName = name.upperToLowerCamelCase
             
             fileBuilder.appendLine("""
                 
-                selector.addHandlerForOperation(.\(internalName), httpMethod: .\(httpMethod),
-                                                operation: \(operationFunctionName),
-                                                allowedErrors: [\(allowedErrors)])
+                let allowedErrorsFor\(name.startingWithUppercase): [(\(baseName)ErrorTypes, Int)] = [\(allowedErrors)]
                 """)
+            
+            switch operationStubGeneration {
+            case .functionWithinContext:
+                fileBuilder.appendLine("""
+                    selector.addHandlerForOperationProvider(.\(internalName), httpMethod: .\(httpMethod),
+                                                            operationProvider: \(baseName)OperationsContext.handle\(name.startingWithUppercase),
+                                                            allowedErrors: allowedErrorsFor\(name.startingWithUppercase))
+                    """)
+            case .standaloneFunction:
+                fileBuilder.appendLine("""
+                    selector.addHandlerForOperation(.\(internalName), httpMethod: .\(httpMethod),
+                                                    operation: handle\(name.startingWithUppercase),
+                                                    allowedErrors: allowedErrorsFor\(name.startingWithUppercase))
+                    """)
+            }
         }
     }
 }

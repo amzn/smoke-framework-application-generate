@@ -5,18 +5,18 @@
         "package": "ServiceModelSwiftCodeGenerate",
         "repositoryURL": "https://github.com/amzn/service-model-swift-code-generate.git",
         "state": {
-          "branch": null,
-          "revision": "2693c4d851d1359cd62e7d791546a86bf5bde583",
-          "version": "2.4.0"
+          "branch": "main",
+          "revision": "9230f017a1c0132afbc2ff7f1baf90ef9a03768b",
+          "version": null
         }
       },
       {
         "package": "SmokeAWSGenerate",
         "repositoryURL": "https://github.com/amzn/smoke-aws-generate.git",
         "state": {
-          "branch": null,
-          "revision": "fe028dbd8103407dfdd830acb076f6a84522b2de",
-          "version": "2.4.0"
+          "branch": "main",
+          "revision": "ef7a6c6df344f9c4738d6d437687f86334c709c3",
+          "version": null
         }
       },
       {
@@ -29,12 +29,21 @@
         }
       },
       {
+        "package": "swift-argument-parser",
+        "repositoryURL": "https://github.com/apple/swift-argument-parser",
+        "state": {
+          "branch": null,
+          "revision": "831ed5e860a70e745bc1337830af4786b2576881",
+          "version": "0.4.1"
+        }
+      },
+      {
         "package": "Yams",
         "repositoryURL": "https://github.com/jpsim/Yams.git",
         "state": {
           "branch": null,
-          "revision": "6652aa7b793d3c8a075db0614acb575fcaecf457",
-          "version": "0.7.0"
+          "revision": "4ec0a3c5d6a2446667a2b22c8c7d0fc82dd1d3de",
+          "version": "4.0.5"
         }
       }
     ]

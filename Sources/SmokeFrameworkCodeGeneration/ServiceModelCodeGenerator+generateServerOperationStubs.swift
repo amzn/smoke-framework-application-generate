@@ -23,7 +23,7 @@ extension ServiceModelCodeGenerator {
     /**
      Generate the stub operations handlers for the generated application.
      */
-    func generateServerOperationHandlerStubs(generationType: GenerationType) {
+    func generateServerOperationHandlerStubs(generationType: GenerationType, operationStubGenerationRule: OperationStubGenerationRule) {
         let baseName = applicationDescription.baseName
         let baseFilePath = applicationDescription.baseFilePath
         let filePath = "\(baseFilePath)/Sources/\(baseName)Operations"
@@ -70,11 +70,37 @@ extension ServiceModelCodeGenerator {
             
             fileBuilder.appendLine(" */")
             
-            fileBuilder.appendLine("""
-                public func handle\(name)(
-                        \(input),
-                        context: \(baseName)OperationsContext)\(errors)\(output) {
-                """)
+            let operationStubGeneration = operationStubGenerationRule.getStubGeneration(forOperation: operationName)
+            
+            switch operationStubGeneration {
+            case .functionWithinContext:
+                if let output = output {
+                    fileBuilder.appendLine("""
+                        extension \(baseName)OperationsContext {
+                            public func handle\(name)(\(input))\(errors)
+                            \(output) {
+                        """)
+                } else {
+                    fileBuilder.appendLine("""
+                        extension \(baseName)OperationsContext {
+                            public func handle\(name)(\(input))\(errors) {
+                        """)
+                }
+                
+                fileBuilder.incIndent()
+            case .standaloneFunction:
+                if let output = output {
+                    fileBuilder.appendLine("""
+                        public func handle\(name)(\(input),
+                                context: \(baseName)OperationsContext)\(errors) \(output) {
+                        """)
+                } else {
+                    fileBuilder.appendLine("""
+                        public func handle\(name)(\(input),
+                                context: \(baseName)OperationsContext)\(errors) {
+                        """)
+                }
+            }
             fileBuilder.incIndent()
             
             // return a default instance of the output type
@@ -85,6 +111,10 @@ extension ServiceModelCodeGenerator {
             }
             
             fileBuilder.appendLine("}", preDec: true)
+            
+            if case .functionWithinContext = operationStubGeneration {
+                fileBuilder.appendLine("}", preDec: true)
+            }
             
             fileBuilder.write(toFile: fileName, atFilePath: filePath)
         }
@@ -113,19 +143,19 @@ extension ServiceModelCodeGenerator {
     private func getOperationOutputAndAddDescription(
             operationDescription: OperationDescription,
             baseName: String,
-            fileBuilder: FileBuilder) -> (output: String, functionOutputType: String?) {
-        let output: String
+            fileBuilder: FileBuilder) -> (output: String?, functionOutputType: String?) {
+        let output: String?
         let functionOutputType: String?
         if let outputType = operationDescription.output {
             let type = outputType.getNormalizedTypeName(forModel: model)
-            output = " -> \(baseName)Model.\(type)"
+            output = "-> \(baseName)Model.\(type)"
             let description = " - Returns: The \(type) object to be passed back from the caller of this operation."
             
             fileBuilder.appendLine(description)
             fileBuilder.appendLine("     Will be validated before being returned to caller.")
             functionOutputType = type
         } else {
-            output = ""
+            output = nil
             functionOutputType = nil
         }
         
