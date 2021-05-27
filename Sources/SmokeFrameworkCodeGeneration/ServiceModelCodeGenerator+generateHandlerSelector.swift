@@ -23,7 +23,8 @@ extension ServiceModelCodeGenerator {
     /**
      Generate the hander selector for the operation handlers for the generated application.
      */
-    func generateServerHanderSelector(operationStubGenerationRule: OperationStubGenerationRule) {
+    func generateServerHanderSelector(operationStubGenerationRule: OperationStubGenerationRule,
+                                      initializationType: InitializationType) {
         
         let fileBuilder = FileBuilder()
         let baseName = applicationDescription.baseName
@@ -48,10 +49,24 @@ extension ServiceModelCodeGenerator {
         fileBuilder.appendLine("""
             extension \(baseName)ModelOperations: OperationIdentity {}
             
-            public func addOperations<SelectorType: SmokeHTTP1HandlerSelector>(selector: inout SelectorType)
-                where SelectorType.ContextType == \(baseName)OperationsContext,
-                SelectorType.OperationIdentifer == \(baseName)ModelOperations {
             """)
+
+        switch initializationType {
+        case .original:
+            fileBuilder.appendLine("""
+                public func addOperations<SelectorType: SmokeHTTP1HandlerSelector>(selector: inout SelectorType)
+                    where SelectorType.ContextType == \(baseName)OperationsContext,
+                    SelectorType.OperationIdentifer == \(baseName)ModelOperations {
+                """)
+        case .streamlined:
+            fileBuilder.appendLine("""
+                public extension \(baseName)ModelOperations {
+                    static func addToSmokeServer<SelectorType: SmokeHTTP1HandlerSelector>(selector: inout SelectorType)
+                        where SelectorType.ContextType == \(baseName)OperationsContext,
+                        SelectorType.OperationIdentifer == \(baseName)ModelOperations {
+                """)
+            fileBuilder.incIndent()
+        }
         
         fileBuilder.incIndent()
         
@@ -68,6 +83,11 @@ extension ServiceModelCodeGenerator {
         
         fileBuilder.decIndent()
         fileBuilder.appendLine("}")
+        
+        if case .streamlined = initializationType {
+            fileBuilder.decIndent()
+            fileBuilder.appendLine("}")
+        }
         
         let fileName = "\(baseName)OperationsHanderSelector.swift"
         fileBuilder.write(toFile: fileName, atFilePath: "\(baseFilePath)/Sources/\(baseName)OperationsHTTP1")

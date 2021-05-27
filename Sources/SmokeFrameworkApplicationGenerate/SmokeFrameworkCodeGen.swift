@@ -5,6 +5,7 @@
 
 import SmokeFrameworkCodeGeneration
 import ServiceModelEntities
+import ServiceModelCodeGeneration
 
 struct SmokeFrameworkCodeGen: Codable {
     let modelFilePath: String
@@ -14,5 +15,6 @@ struct SmokeFrameworkCodeGen: Codable {
     let applicationDescription: String?
     let modelOverride: ModelOverride?
     let httpClientConfiguration: HttpClientConfiguration?
+    let initializationType: InitializationType?
     let operationStubGenerationRule: OperationStubGenerationRule
 }

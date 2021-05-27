@@ -30,6 +30,11 @@ public enum GenerationType: String, Codable, ExpressibleByArgument {
     case serverUpdate
 }
 
+public enum InitializationType: String, Codable {
+    case original = "ORIGINAL"
+    case streamlined = "STREAMLINED"
+}
+
 public enum OperationStubGeneration {
     case functionWithinContext
     case standaloneFunction
@@ -122,10 +127,13 @@ public struct SmokeFrameworkCodeGeneration {
         customizations: CodeGenerationCustomizations,
         applicationDescription: ApplicationDescription,
         operationStubGenerationRule: OperationStubGenerationRule,
+        initializationType: InitializationType,
         modelOverride: ModelOverride?) throws -> ModelType {
             func generatorFunction(codeGenerator: ServiceModelCodeGenerator,
                                    serviceModel: ModelType) throws {
                 try codeGenerator.generateFromModel(serviceModel: serviceModel, generationType: generationType,
+                                                    asyncAwaitClientGeneration: customizations.asyncAwaitGeneration,
+                                                    initializationType: initializationType,
                                                     operationStubGenerationRule: operationStubGenerationRule)
             }
         
@@ -142,26 +150,32 @@ extension ServiceModelCodeGenerator {
     
     func generateFromModel<ModelType: ServiceModel>(serviceModel: ModelType,
                                                     generationType: GenerationType,
+                                                    asyncAwaitClientGeneration: AsyncAwaitGeneration,
+                                                    initializationType: InitializationType,
                                                     operationStubGenerationRule: OperationStubGenerationRule) throws {
         let clientProtocolDelegate = ClientProtocolDelegate(
-            baseName: applicationDescription.baseName)
+            baseName: applicationDescription.baseName,
+            asyncAwaitGeneration: asyncAwaitClientGeneration)
         let mockClientDelegate = MockClientDelegate(
             baseName: applicationDescription.baseName,
-            isThrowingMock: false)
+            isThrowingMock: false,
+            asyncAwaitGeneration: asyncAwaitClientGeneration)
         let throwingClientDelegate = MockClientDelegate(
             baseName: applicationDescription.baseName,
-            isThrowingMock: true)
+            isThrowingMock: true,
+            asyncAwaitGeneration: asyncAwaitClientGeneration)
         let awsClientDelegate = APIGatewayClientDelegate(
-            baseName: applicationDescription.baseName, asyncResultType: nil,
+            baseName: applicationDescription.baseName, asyncAwaitGeneration: asyncAwaitClientGeneration,
             contentType: "application/json", signAllHeaders: false,
             defaultInvocationTraceContext: InvocationTraceContextDeclaration(name: "SmokeInvocationTraceContext", importPackage: "SmokeOperationsHTTP1"))
         let awsModelErrorsDelegate = SmokeFrameworkModelErrorsDelegate()
         
         generateServerOperationHandlerStubs(generationType: generationType, operationStubGenerationRule: operationStubGenerationRule)
-        generateServerHanderSelector(operationStubGenerationRule: operationStubGenerationRule)
+        generateServerHanderSelector(operationStubGenerationRule: operationStubGenerationRule,
+                                     initializationType: initializationType)
         generateServerApplicationFiles(generationType: generationType)
         generateOperationsContext(generationType: generationType)
-        generateOperationsContextGenerator(generationType: generationType)
+        generateOperationsContextGenerator(generationType: generationType, initializationType: initializationType)
         generateOperationTests(generationType: generationType, operationStubGenerationRule: operationStubGenerationRule)
         generateTestConfiguration(generationType: generationType)
         generateLinuxMain()
