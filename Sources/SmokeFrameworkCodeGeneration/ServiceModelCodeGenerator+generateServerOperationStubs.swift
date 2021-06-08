@@ -170,7 +170,9 @@ extension ServiceModelCodeGenerator {
             errors = " throws"
             var description = " - Throws: "
             
-            for (index, error) in operationDescription.errors.enumerated() {
+            let sortedErrors = operationDescription.errors.sorted(by: <)
+            
+            for (index, error) in sortedErrors.enumerated() {
                 if index != 0 {
                     description += ", "
                 }

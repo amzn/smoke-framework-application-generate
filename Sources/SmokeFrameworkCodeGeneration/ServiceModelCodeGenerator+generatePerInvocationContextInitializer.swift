@@ -22,7 +22,17 @@ extension ServiceModelCodeGenerator {
     /**
      Generate the stub operations context generator for the generated application.
      */
-    func generateOperationsContextGenerator(generationType: GenerationType) {
+    func generateOperationsContextGenerator(generationType: GenerationType,
+                                            initializationType: InitializationType) {
+        switch initializationType {
+        case .original:
+            generateOriginalOperationsContextGenerator(generationType: generationType)
+        case .streamlined:
+            generateStreamlinedOperationsContextGenerator(generationType: generationType)
+        }
+    }
+    
+    private func generateOriginalOperationsContextGenerator(generationType: GenerationType) {
         
         let fileBuilder = FileBuilder()
         let baseName = applicationDescription.baseName
@@ -81,8 +91,8 @@ extension ServiceModelCodeGenerator {
                 /**
                  On invocation.
                 */
-                public func getInvocationContext(
-                    invocationReporting: SmokeServerInvocationReporting<SmokeInvocationTraceContext>) -> \(baseName)OperationsContext {
+                public func getInvocationContext(invocationReporting: SmokeServerInvocationReporting<SmokeInvocationTraceContext>)
+                -> \(baseName)OperationsContext {
                     return \(baseName)OperationsContext(logger: invocationReporting.logger)
                 }
             
@@ -91,6 +101,113 @@ extension ServiceModelCodeGenerator {
                 */
                 func onShutdown() throws {
                     
+                }
+            }
+            """)
+        
+        fileBuilder.write(toFile: fileName, atFilePath: filePath)
+    }
+    
+    private func generateStreamlinedOperationsContextGenerator(generationType: GenerationType) {
+        generateStreamlinedOperationsContextProtocolGenerator(generationType: generationType)
+        
+        let fileBuilder = FileBuilder()
+        let baseName = applicationDescription.baseName
+        let baseFilePath = applicationDescription.baseFilePath
+        let applicationSuffix = applicationDescription.applicationSuffix
+        
+        let fileName = "\(baseName)PerInvocationContextInitializer.swift"
+        let filePath = "\(baseFilePath)/Sources/\(baseName)\(applicationSuffix)"
+        
+        if case .serverUpdate = generationType {
+            guard !FileManager.default.fileExists(atPath: "\(filePath)/\(fileName)") else {
+                return
+            }
+        }
+        
+        fileBuilder.appendLine("""
+            //
+            // \(baseName)PerInvocationContextInitializer.swift
+            // \(baseName)\(applicationSuffix)
+            //
+            
+            import \(baseName)Operations
+            import \(baseName)OperationsHTTP1
+            import SmokeOperationsHTTP1Server
+            import SmokeAWSCore
+            import NIO
+                        
+            /**
+             Initializer for the \(baseName)\(applicationSuffix).
+             */
+            struct \(baseName)PerInvocationContextInitializer: \(baseName)PerInvocationContextInitializerProtocol {
+                // TODO: Add properties to be accessed by the operation handlers
+            
+                /**
+                 On application startup.
+                 */
+                init(eventLoopGroup: EventLoopGroup) throws {
+                    CloudwatchStandardErrorLogger.enableLogging()
+            
+                    // TODO: Add additional application initialization
+                }
+            
+                /**
+                 On invocation.
+                */
+                public func getInvocationContext(invocationReporting: SmokeServerInvocationReporting<SmokeInvocationTraceContext>)
+                -> \(baseName)OperationsContext {
+                    return \(baseName)OperationsContext(logger: invocationReporting.logger)
+                }
+            
+                /**
+                 On application shutdown.
+                */
+                func onShutdown() throws {
+                    
+                }
+            }
+            """)
+        
+        fileBuilder.write(toFile: fileName, atFilePath: filePath)
+    }
+    
+    private func generateStreamlinedOperationsContextProtocolGenerator(generationType: GenerationType) {
+        
+        let fileBuilder = FileBuilder()
+        let baseName = applicationDescription.baseName
+        let baseFilePath = applicationDescription.baseFilePath
+        let applicationSuffix = applicationDescription.applicationSuffix
+        
+        let fileName = "\(baseName)PerInvocationContextInitializerProtocol.swift"
+        let filePath = "\(baseFilePath)/Sources/\(baseName)OperationsHTTP1"
+        
+        fileBuilder.appendLine("""
+            //
+            // \(baseName)PerInvocationContextInitializerProtocol.swift
+            // \(baseName)OperationsHTTP1
+            //
+            
+            import \(baseName)Model
+            import \(baseName)Operations
+            import SmokeOperationsHTTP1Server
+                        
+            /**
+             Convenience protocol for the initialization of \(baseName)\(applicationSuffix).
+             */
+            public protocol \(baseName)PerInvocationContextInitializerProtocol: StandardJSONSmokeServerPerInvocationContextInitializer
+            where ContextType == \(baseName)OperationsContext, OperationIdentifer == \(baseName)ModelOperations {
+
+            }
+            
+            public extension \(baseName)PerInvocationContextInitializerProtocol {
+                // specify how to initalize the server with operations
+                var operationsInitializer: OperationsInitializerType {
+                    return \(baseName)ModelOperations.addToSmokeServer
+                }
+            
+                var serverName: String {
+                    return "\(baseName)\(applicationSuffix)"
                 }
             }
             """)
