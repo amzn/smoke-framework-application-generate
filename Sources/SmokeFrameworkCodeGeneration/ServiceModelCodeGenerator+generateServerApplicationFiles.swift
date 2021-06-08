@@ -127,6 +127,7 @@ extension ServiceModelCodeGenerator {
                         name: "\(baseName)OperationsHTTP1", dependencies: [
                             .target(name: "\(baseName)Operations"),
                             .product(name: "SmokeOperationsHTTP1", package: "smoke-framework"),
+                            .product(name: "SmokeOperationsHTTP1Server", package: "smoke-framework"),
                         ]),
                     .target(
                         name: "\(baseName)Client", dependencies: [
