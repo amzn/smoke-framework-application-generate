@@ -188,7 +188,7 @@ func handleApplication(parameters: Parameters) throws {
                                                           modelOverride: modelOverride,
                                                           httpClientConfiguration: httpClientConfigurationOptional,
                                                           initializationType: parameters.initializationType,
-                                                          operationStubGenerationRule: .allFunctionsWithinContextExceptStandaloneFunctionsFor(existingOperations))
+                                                          operationStubGenerationRule: .allFunctionsWithinContextExceptStandaloneFunctionsFor(existingOperations.sorted(by: <)))
         
         let jsonEncoder = JSONEncoder()
         jsonEncoder.outputFormatting = .prettyPrinted
