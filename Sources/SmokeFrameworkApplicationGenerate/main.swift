@@ -21,6 +21,7 @@ import ServiceModelEntities
 import SmokeFrameworkCodeGeneration
 import SwaggerServiceModel
 import ArgumentParser
+import OpenAPIServiceModel
 
 private let configFileName = "smoke-framework-codegen.json"
 
@@ -86,7 +87,7 @@ private func startCodeGeneration(
         modelFilePath: String, generationType: GenerationType,
         initializationType: InitializationType,
         operationStubGenerationRule: OperationStubGenerationRule,
-        modelOverride: ModelOverride?) throws -> SwaggerServiceModel {
+    modelOverride: ModelOverride?) throws -> OpenAPIServiceModel {
     let validationErrorDeclaration = ErrorDeclaration.external(
         libraryImport: "SmokeOperations",
         errorType: "SmokeOperationsError")
@@ -108,7 +109,7 @@ private func startCodeGeneration(
     
     return try SmokeFrameworkCodeGeneration.generateFromModel(
         modelFilePath: modelFilePath,
-        modelType: SwaggerServiceModel.self,
+        modelType: OpenAPIServiceModel.self,
         generationType: generationType,
         customizations: customizations,
         applicationDescription: fullApplicationDescription,
