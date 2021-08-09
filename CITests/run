@@ -14,6 +14,9 @@ cd /package
 if [ "$ONLY_RUN_SWIFT_LINT" == 'yes' ]; then
     ls
     swiftlint
+# Temporary work around for swift 5.4 build errors with OpenAPIKit
+elif [ "$DOCKER_IMAGE_TAG" == 'swift:5.4.0-amazonlinux2' ]; then
+   swift build -Xswiftc -Xfrontend -Xswiftc -sil-verify-none -c release
 else
     swift build -c release
     #swift test
