@@ -42,7 +42,7 @@ struct Parameters {
     var httpClientConfiguration: ConfigurationProvider<HttpClientConfiguration>?
     var initializationType: InitializationType?
     var operationStubGenerationRule: OperationStubGenerationRule
-    var version: Int
+    var swaggerFileVersion: Int
 }
 
 private func getModelOverride(modelOverridePath: String?) throws -> ModelOverride? {
@@ -119,7 +119,7 @@ private func startCodeGeneration(
             operationStubGenerationRule: operationStubGenerationRule,
             initializationType: initializationType,
             modelOverride: modelOverride)
-    } else {
+    } else if swaggerFileVersion == 2 {
         return try SmokeFrameworkCodeGeneration.generateFromModel(
             modelFilePath: modelFilePath,
             modelType: SwaggerServiceModel.self,
@@ -129,6 +129,8 @@ private func startCodeGeneration(
             operationStubGenerationRule: operationStubGenerationRule,
             initializationType: initializationType,
             modelOverride: modelOverride)
+    } else {
+        fatalError("Invalid swagger version.")
     }
 }
 
@@ -178,7 +180,7 @@ func handleApplication(parameters: Parameters) throws {
         generationType: parameters.generationType,
         initializationType: parameters.initializationType ?? .original,
         operationStubGenerationRule: parameters.operationStubGenerationRule,
-        modelOverride: modelOverride, swaggerFileVersion: parameters.version)
+        modelOverride: modelOverride, swaggerFileVersion: parameters.swaggerFileVersion)
     
     if (parameters.generateCodeGenConfig ?? false) {
         let parameterModelFilePath = parameters.modelFilePath
@@ -374,7 +376,7 @@ struct SmokeFrameworkApplicationGenerateCommand: ParsableCommand {
             httpClientConfiguration: httpClientConfiguration,
             initializationType: config?.initializationType,
             operationStubGenerationRule: operationStubGenerationRule,
-            version: theSwaggerVersion)
+            swaggerFileVersion: theSwaggerVersion)
         
         try handleApplication(parameters: parameters)
     }
