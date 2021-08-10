@@ -49,6 +49,11 @@ let package = Package(
                 .product(name: "SmokeAWSModelGenerate", package: "SmokeAWSGenerate"),
             ]
         ),
+        .testTarget(
+            name: "CodeGenerateTests", dependencies: [
+                .target(name: "SmokeFrameworkApplicationGenerate"),
+            ]
+        ),
     ],
     swiftLanguageVersions: [.v5]
 )
