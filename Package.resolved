@@ -2,11 +2,20 @@
   "object": {
     "pins": [
       {
+        "package": "OpenAPIKit",
+        "repositoryURL": "https://github.com/mndzup/OpenAPIKit.git",
+        "state": {
+          "branch": "main",
+          "revision": "84fc477c8e96a7013269a355f1f5734dd70e53f7",
+          "version": null
+        }
+      },
+      {
         "package": "ServiceModelSwiftCodeGenerate",
         "repositoryURL": "https://github.com/amzn/service-model-swift-code-generate.git",
         "state": {
           "branch": "main",
-          "revision": "a348d30ff63dfa00123a30e3ccf32516fe3df9b9",
+          "revision": "560411096a51c0b193aab264203dd823ace0d5d7",
           "version": null
         }
       },
@@ -15,7 +24,7 @@
         "repositoryURL": "https://github.com/amzn/smoke-aws-generate.git",
         "state": {
           "branch": "main",
-          "revision": "e3ff89af1a7bd712431c6ada92a564ed24fea770",
+          "revision": "752df4b5cf5b63c9fe581bd4fdc724b9b064966c",
           "version": null
         }
       },
@@ -33,8 +42,8 @@
         "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
           "branch": null,
-          "revision": "986d191f94cec88f6350056da59c2e59e83d1229",
-          "version": "0.4.3"
+          "revision": "83b23d940471b313427da226196661856f6ba3e0",
+          "version": "0.4.4"
         }
       },
       {

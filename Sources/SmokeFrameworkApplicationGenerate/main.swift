@@ -21,6 +21,7 @@ import ServiceModelEntities
 import SmokeFrameworkCodeGeneration
 import SwaggerServiceModel
 import ArgumentParser
+import OpenAPIServiceModel
 
 private let configFileName = "smoke-framework-codegen.json"
 
@@ -41,6 +42,7 @@ struct Parameters {
     var httpClientConfiguration: ConfigurationProvider<HttpClientConfiguration>?
     var initializationType: InitializationType?
     var operationStubGenerationRule: OperationStubGenerationRule
+    var swaggerFileVersion: Int
 }
 
 private func getModelOverride(modelOverridePath: String?) throws -> ModelOverride? {
@@ -86,7 +88,8 @@ private func startCodeGeneration(
         modelFilePath: String, generationType: GenerationType,
         initializationType: InitializationType,
         operationStubGenerationRule: OperationStubGenerationRule,
-        modelOverride: ModelOverride?) throws -> SwaggerServiceModel {
+        modelOverride: ModelOverride?,
+    swaggerFileVersion: Int) throws -> ServiceModel {
     let validationErrorDeclaration = ErrorDeclaration.external(
         libraryImport: "SmokeOperations",
         errorType: "SmokeOperationsError")
@@ -106,15 +109,29 @@ private func startCodeGeneration(
         applicationDescription: applicationDescription,
         applicationSuffix: applicationSuffix)
     
-    return try SmokeFrameworkCodeGeneration.generateFromModel(
-        modelFilePath: modelFilePath,
-        modelType: SwaggerServiceModel.self,
-        generationType: generationType,
-        customizations: customizations,
-        applicationDescription: fullApplicationDescription,
-        operationStubGenerationRule: operationStubGenerationRule,
-        initializationType: initializationType,
-        modelOverride: modelOverride)
+    if swaggerFileVersion == 3 {
+        return try SmokeFrameworkCodeGeneration.generateFromModel(
+            modelFilePath: modelFilePath,
+            modelType: OpenAPIServiceModel.self,
+            generationType: generationType,
+            customizations: customizations,
+            applicationDescription: fullApplicationDescription,
+            operationStubGenerationRule: operationStubGenerationRule,
+            initializationType: initializationType,
+            modelOverride: modelOverride)
+    } else if swaggerFileVersion == 2 {
+        return try SmokeFrameworkCodeGeneration.generateFromModel(
+            modelFilePath: modelFilePath,
+            modelType: SwaggerServiceModel.self,
+            generationType: generationType,
+            customizations: customizations,
+            applicationDescription: fullApplicationDescription,
+            operationStubGenerationRule: operationStubGenerationRule,
+            initializationType: initializationType,
+            modelOverride: modelOverride)
+    } else {
+        fatalError("Invalid swagger version.")
+    }
 }
 
 func handleApplication(parameters: Parameters) throws {
@@ -163,7 +180,7 @@ func handleApplication(parameters: Parameters) throws {
         generationType: parameters.generationType,
         initializationType: parameters.initializationType ?? .original,
         operationStubGenerationRule: parameters.operationStubGenerationRule,
-        modelOverride: modelOverride)
+        modelOverride: modelOverride, swaggerFileVersion: parameters.swaggerFileVersion)
     
     if (parameters.generateCodeGenConfig ?? false) {
         let parameterModelFilePath = parameters.modelFilePath
@@ -248,6 +265,9 @@ struct SmokeFrameworkApplicationGenerateCommand: ParsableCommand {
          unretryable.
         """)
     var httpClientConfigurationPath: String?
+    
+    @Option(name: .customLong("swagger-version"), help: "The swagger version to build the service model from.")
+    var version: Int?
 
     mutating func run() throws {
         let configFile = FileHandle(forReadingAtPath: "\(baseFilePath)/\(configFileName)")
@@ -337,6 +357,13 @@ struct SmokeFrameworkApplicationGenerateCommand: ParsableCommand {
             operationStubGenerationRule = .allStandaloneFunctions
         }
         
+        let theSwaggerVersion: Int
+        if let versionOverride = version {
+            theSwaggerVersion = versionOverride
+        } else {
+            theSwaggerVersion = 2
+        }
+        
         let parameters = Parameters(
             modelFilePath: theModelFilePath,
             baseName: theBaseName,
@@ -348,7 +375,8 @@ struct SmokeFrameworkApplicationGenerateCommand: ParsableCommand {
             generateCodeGenConfig: generateCodeGenConfig ?? false,
             httpClientConfiguration: httpClientConfiguration,
             initializationType: config?.initializationType,
-            operationStubGenerationRule: operationStubGenerationRule)
+            operationStubGenerationRule: operationStubGenerationRule,
+            swaggerFileVersion: theSwaggerVersion)
         
         try handleApplication(parameters: parameters)
     }
