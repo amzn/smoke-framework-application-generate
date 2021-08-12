@@ -27,6 +27,9 @@ let package = Package(
         .library(
             name: "SmokeFrameworkCodeGeneration",
             targets: ["SmokeFrameworkCodeGeneration"]),
+        .library(
+            name: "SmokeFrameworkApplicationGenerateCommand",
+            targets: ["SmokeFrameworkApplicationGenerateCommand"]),
     ],
     dependencies: [
         .package(name: "SmokeAWSGenerate",
@@ -38,6 +41,13 @@ let package = Package(
     targets: [
         .target(
             name: "SmokeFrameworkApplicationGenerate", dependencies: [
+                .target(name: "SmokeFrameworkApplicationGenerateCommand"),
+                .product(name: "OpenAPIServiceModel", package: "ServiceModelSwiftCodeGenerate"),
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+            ]
+        ),
+        .target(
+            name: "SmokeFrameworkApplicationGenerateCommand", dependencies: [
                 .target(name: "SmokeFrameworkCodeGeneration"),
                 .product(name: "OpenAPIServiceModel", package: "ServiceModelSwiftCodeGenerate"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
@@ -51,7 +61,7 @@ let package = Package(
         ),
         .testTarget(
             name: "CodeGenerateTests", dependencies: [
-                .target(name: "SmokeFrameworkApplicationGenerate"),
+                .target(name: "SmokeFrameworkApplicationGenerateCommand")
             ]
         ),
     ],
