@@ -51,7 +51,7 @@ let package = Package(
         ),
         .testTarget(
             name: "CodeGenerateTests", dependencies: [
-                .target(name: "SmokeFrameworkApplicationGenerate"),
+                
             ]
         ),
     ],
