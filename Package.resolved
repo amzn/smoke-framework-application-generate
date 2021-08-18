@@ -6,7 +6,7 @@
         "repositoryURL": "https://github.com/mndzup/OpenAPIKit.git",
         "state": {
           "branch": "main",
-          "revision": "84fc477c8e96a7013269a355f1f5734dd70e53f7",
+          "revision": "fc227db5879429e0f8b8245878689c43212542ca",
           "version": null
         }
       },
@@ -14,8 +14,8 @@
         "package": "ServiceModelSwiftCodeGenerate",
         "repositoryURL": "https://github.com/amzn/service-model-swift-code-generate.git",
         "state": {
-          "branch": "main",
-          "revision": "560411096a51c0b193aab264203dd823ace0d5d7",
+          "branch": "mndzup",
+          "revision": "71f479ddd896184c305255e51ec4cb3eeaa32fdc",
           "version": null
         }
       },
@@ -23,8 +23,8 @@
         "package": "SmokeAWSGenerate",
         "repositoryURL": "https://github.com/amzn/smoke-aws-generate.git",
         "state": {
-          "branch": "main",
-          "revision": "752df4b5cf5b63c9fe581bd4fdc724b9b064966c",
+          "branch": "working",
+          "revision": "de891716d8c6bf2488bba493d9619fbdff0046ec",
           "version": null
         }
       },

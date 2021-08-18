@@ -33,9 +33,9 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "SmokeAWSGenerate",
-                 url: "https://github.com/amzn/smoke-aws-generate.git", .branch("main")),
+                 url: "https://github.com/amzn/smoke-aws-generate.git", .branch("working")),
         .package(name: "ServiceModelSwiftCodeGenerate",
-                 url: "https://github.com/amzn/service-model-swift-code-generate.git", .branch("main")),
+                 url: "https://github.com/amzn/service-model-swift-code-generate.git", .branch("mndzup")),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
     ],
     targets: [
