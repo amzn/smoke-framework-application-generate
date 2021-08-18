@@ -14,8 +14,8 @@
         "package": "ServiceModelSwiftCodeGenerate",
         "repositoryURL": "https://github.com/amzn/service-model-swift-code-generate.git",
         "state": {
-          "branch": "mndzup",
-          "revision": "71f479ddd896184c305255e51ec4cb3eeaa32fdc",
+          "branch": "main",
+          "revision": "c2d00319b694a137bf7f9de3adb27a99648e6ac9",
           "version": null
         }
       },
@@ -23,8 +23,8 @@
         "package": "SmokeAWSGenerate",
         "repositoryURL": "https://github.com/amzn/smoke-aws-generate.git",
         "state": {
-          "branch": "working",
-          "revision": "de891716d8c6bf2488bba493d9619fbdff0046ec",
+          "branch": "main",
+          "revision": "752df4b5cf5b63c9fe581bd4fdc724b9b064966c",
           "version": null
         }
       },
