@@ -1,0 +1,37 @@
+name: build
+
+on:
+  push:
+    branches: [ main, smoke-framework-application-generate-2.x, smoke-framework-application-generate-1.x ]
+  pull_request:
+    branches: [ main, smoke-framework-application-generate-2.x, smoke-framework-application-generate-1.x ]
+      
+jobs:
+  Build:
+    name: Swift ${{ matrix.swift }} on ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+        swift: ["5.5", "5.3.3"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: marcprux/setup-swift@a990bc57c514a77d232b645843ade099af21aa5e
+        with:
+          swift-version: ${{ matrix.swift }}
+      - uses: actions/checkout@v2
+      - name: Build
+        run: swift build -c release
+  BuildOpenAPIWorkaround:
+    name: Swift ${{ matrix.swift }} on ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+        swift: ["5.4.3"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: marcprux/setup-swift@a990bc57c514a77d232b645843ade099af21aa5e
+        with:
+          swift-version: ${{ matrix.swift }}
+      - uses: actions/checkout@v2
+      - name: Build
+        run: swift build -Xswiftc -Xfrontend -Xswiftc -sil-verify-none -c release
