@@ -23,9 +23,13 @@ extension ServiceModelCodeGenerator {
     /**
      Generate the main Swift file for the generated application as a Container Server.
      */
-    func generateServerApplicationFiles(generationType: GenerationType) {
-        generateContainerServerApplicationMain(generationType: generationType)
-        generatePackageFile(generationType: generationType)
+    func generateServerApplicationFiles(generationType: GenerationType,
+                                        asyncOperationStubs: CodeGenFeatureStatus,
+                                        mainAnnotation: CodeGenFeatureStatus) {
+        if case .disabled = mainAnnotation {
+            generateContainerServerApplicationMain(generationType: generationType)
+        }
+        generatePackageFile(generationType: generationType, asyncOperationStubs: asyncOperationStubs)
         generateLintFile(generationType: generationType)
         generateGitIgnoreFile(generationType: generationType)
     }
@@ -61,7 +65,8 @@ extension ServiceModelCodeGenerator {
         fileBuilder.write(toFile: fileName, atFilePath: filePath)
     }
 
-    private func generatePackageFile(generationType: GenerationType) {
+    private func generatePackageFile(generationType: GenerationType,
+                                     asyncOperationStubs: CodeGenFeatureStatus) {
         
         let fileBuilder = FileBuilder()
         let baseName = applicationDescription.baseName
@@ -76,8 +81,19 @@ extension ServiceModelCodeGenerator {
             }
         }
         
+        let macOSVersion: String
+        let iOSVersion: String
+        switch asyncOperationStubs {
+        case .disabled:
+            macOSVersion = ".v10_15"
+            iOSVersion = ".v10"
+        case .enabled:
+            macOSVersion = ".v12"
+            iOSVersion = ".v15"
+        }
+        
         fileBuilder.appendLine("""
-            // swift-tools-version:5.2
+            // swift-tools-version:5.5
             // The swift-tools-version declares the minimum version of Swift required to build this package.
 
             import PackageDescription
@@ -85,7 +101,7 @@ extension ServiceModelCodeGenerator {
             let package = Package(
                 name: "\(baseName)",
                 platforms: [
-                  .macOS(.v10_15), .iOS(.v10)
+                  .macOS(\(macOSVersion)), .iOS(\(iOSVersion))
                 ],
                 products: [
                     // Products define the executables and libraries produced by a package, and make them visible to other packages.
@@ -135,7 +151,7 @@ extension ServiceModelCodeGenerator {
                             .product(name: "SmokeOperationsHTTP1", package: "smoke-framework"),
                             .product(name: "SmokeAWSHttp", package: "smoke-aws"),
                         ]),
-                    .target(
+                    .executableTarget(
                         name: "\(baseName)\(applicationSuffix)", dependencies: [
                             .target(name: "\(baseName)OperationsHTTP1"),
                             .product(name: "SmokeAWSCredentials", package: "smoke-aws-credentials"),

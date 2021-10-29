@@ -22,12 +22,25 @@ import ServiceModelEntities
 extension ServiceModelCodeGenerator {
     private func generateExampleTestCase(operationDescription: OperationDescription, name: String,
                                          input: String, fileBuilder: FileBuilder,
-                                         operationStubGeneration: OperationStubGeneration) {
+                                         operationStubGeneration: OperationStubGeneration,
+                                         asyncOperationStubs: CodeGenFeatureStatus) {
         let tryPrefix = !operationDescription.errors.isEmpty ? "try " : ""
+        let throwsPrefix = !operationDescription.errors.isEmpty ? " throws" : ""
+
+        let asyncInfix: String
+        let awaitInfix: String
+        switch asyncOperationStubs {
+        case .disabled:
+            asyncInfix = ""
+            awaitInfix = ""
+        case .enabled:
+            asyncInfix = " async"
+            awaitInfix = "await "
+        }
         
         // append the body of the test for this operation.
         fileBuilder.appendLine("""
-            func test\(name)() {
+            func test\(name)()\(asyncInfix)\(throwsPrefix) {
                 let input = \(input).__default
                 let operationsContext = createOperationsContext()
             
@@ -37,24 +50,26 @@ extension ServiceModelCodeGenerator {
         case .functionWithinContext:
             if let output = operationDescription.output {
                 fileBuilder.appendLine("""
-                        XCTAssertEqual(\(tryPrefix)operationsContext.handle\(name)(input: input), \(output).__default)
+                        let response = \(tryPrefix)\(awaitInfix)operationsContext.handle\(name)(input: input)
+                        XCTAssertEqual(response, \(output).__default)
                     }
                     """)
             } else {
                 fileBuilder.appendLine("""
-                        XCTAssertNoThrow(\(tryPrefix)operationsContext.handle\(name)(input: input))
+                        \(tryPrefix)\(awaitInfix)operationsContext.handle\(name)(input: input)
                     }
                     """)
             }
         case .standaloneFunction:
             if let output = operationDescription.output {
                 fileBuilder.appendLine("""
-                        XCTAssertEqual(\(tryPrefix)handle\(name)(input: input, context: operationsContext), \(output).__default)
+                        let response = \(tryPrefix)\(awaitInfix)handle\(name)(input: input, context: operationsContext)
+                        XCTAssertEqual(response, \(output).__default)
                     }
                     """)
             } else {
                 fileBuilder.appendLine("""
-                        XCTAssertNoThrow(\(tryPrefix)handle\(name)(input: input, context: operationsContext))
+                        \(tryPrefix)\(awaitInfix)handle\(name)(input: input, context: operationsContext)
                     }
                     """)
             }
@@ -64,7 +79,8 @@ extension ServiceModelCodeGenerator {
     /**
      Generate the example operation unit tests for the generated application.
      */
-    func generateOperationTests(generationType: GenerationType, operationStubGenerationRule: OperationStubGenerationRule) {
+    func generateOperationTests(generationType: GenerationType, operationStubGenerationRule: OperationStubGenerationRule,
+                                asyncOperationStubs: CodeGenFeatureStatus, testDiscovery: CodeGenFeatureStatus) {
         let baseName = applicationDescription.baseName
         let baseFilePath = applicationDescription.baseFilePath
         let filePath = "\(baseFilePath)/Tests/\(baseName)OperationsTests"
@@ -106,15 +122,18 @@ extension ServiceModelCodeGenerator {
             
             let operationStubGeneration = operationStubGenerationRule.getStubGeneration(forOperation: operationName)
             generateExampleTestCase(operationDescription: operationDescription, name: name, input: input,
-                                    fileBuilder: fileBuilder, operationStubGeneration: operationStubGeneration)
-        
-            // append the allTests list
-            fileBuilder.appendEmptyLine()
-            fileBuilder.appendLine("""
-                static var allTests = [
-                    ("test\(name)", test\(name)),
-                ]
-                """)
+                                    fileBuilder: fileBuilder, operationStubGeneration: operationStubGeneration,
+                                    asyncOperationStubs: asyncOperationStubs)
+            
+            if case .disabled = testDiscovery {
+                // append the allTests list
+                fileBuilder.appendEmptyLine()
+                fileBuilder.appendLine("""
+                    static var allTests = [
+                        ("test\(name)", test\(name)),
+                    ]
+                    """)
+            }
             
             fileBuilder.appendLine("}", preDec: true)
         

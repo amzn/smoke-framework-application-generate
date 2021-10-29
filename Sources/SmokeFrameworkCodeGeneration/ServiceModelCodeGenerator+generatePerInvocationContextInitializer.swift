@@ -23,16 +23,18 @@ extension ServiceModelCodeGenerator {
      Generate the stub operations context generator for the generated application.
      */
     func generateOperationsContextGenerator(generationType: GenerationType,
-                                            initializationType: InitializationType) {
+                                            initializationType: InitializationType,
+                                            mainAnnotation: CodeGenFeatureStatus) {
         switch initializationType {
         case .original:
-            generateOriginalOperationsContextGenerator(generationType: generationType)
+            generateOriginalOperationsContextGenerator(generationType: generationType, mainAnnotation: mainAnnotation)
         case .streamlined:
-            generateStreamlinedOperationsContextGenerator(generationType: generationType)
+            generateStreamlinedOperationsContextGenerator(generationType: generationType, mainAnnotation: mainAnnotation)
         }
     }
     
-    private func generateOriginalOperationsContextGenerator(generationType: GenerationType) {
+    private func generateOriginalOperationsContextGenerator(generationType: GenerationType,
+                                                            mainAnnotation: CodeGenFeatureStatus) {
         
         let fileBuilder = FileBuilder()
         let baseName = applicationDescription.baseName
@@ -57,6 +59,7 @@ extension ServiceModelCodeGenerator {
             import \(baseName)Model
             import \(baseName)Operations
             import \(baseName)OperationsHTTP1
+            import SmokeHTTP1
             import SmokeOperationsHTTP1
             import SmokeOperationsHTTP1Server
             import SmokeAWSCore
@@ -67,6 +70,15 @@ extension ServiceModelCodeGenerator {
             /**
              Initializer for the \(baseName)\(applicationSuffix).
              */
+            """)
+        
+        if case .enabled = mainAnnotation {
+            fileBuilder.appendLine("""
+                @main
+                """)
+        }
+        
+        fileBuilder.appendLine("""
             struct \(baseName)PerInvocationContextInitializer: SmokeServerPerInvocationContextInitializer {
                 typealias SelectorType =
                     StandardSmokeHTTP1HandlerSelector<\(baseName)OperationsContext, \(baseName)OperationDelegate,
@@ -102,13 +114,18 @@ extension ServiceModelCodeGenerator {
                 func onShutdown() throws {
                     
                 }
+            
+                static func main() throws {
+                    SmokeHTTP1Server.runAsOperationServer(Self.init)
+                }
             }
             """)
         
         fileBuilder.write(toFile: fileName, atFilePath: filePath)
     }
     
-    private func generateStreamlinedOperationsContextGenerator(generationType: GenerationType) {
+    private func generateStreamlinedOperationsContextGenerator(generationType: GenerationType,
+                                                               mainAnnotation: CodeGenFeatureStatus) {
         generateStreamlinedOperationsContextProtocolGenerator(generationType: generationType)
         
         let fileBuilder = FileBuilder()
@@ -140,6 +157,15 @@ extension ServiceModelCodeGenerator {
             /**
              Initializer for the \(baseName)\(applicationSuffix).
              */
+            """)
+        
+        if case .enabled = mainAnnotation {
+            fileBuilder.appendLine("""
+                @main
+                """)
+        }
+        
+        fileBuilder.appendLine("""
             struct \(baseName)PerInvocationContextInitializer: \(baseName)PerInvocationContextInitializerProtocol {
                 // TODO: Add properties to be accessed by the operation handlers
             
@@ -190,6 +216,8 @@ extension ServiceModelCodeGenerator {
             
             import \(baseName)Model
             import \(baseName)Operations
+            import NIO
+            import SmokeHTTP1
             import SmokeOperationsHTTP1Server
                         
             /**
@@ -197,7 +225,7 @@ extension ServiceModelCodeGenerator {
              */
             public protocol \(baseName)PerInvocationContextInitializerProtocol: StandardJSONSmokeServerPerInvocationContextInitializer
             where ContextType == \(baseName)OperationsContext, OperationIdentifer == \(baseName)ModelOperations {
-
+                init(eventLoopGroup: EventLoopGroup) throws
             }
             
             public extension \(baseName)PerInvocationContextInitializerProtocol {
@@ -208,6 +236,10 @@ extension ServiceModelCodeGenerator {
             
                 var serverName: String {
                     return "\(baseName)\(applicationSuffix)"
+                }
+            
+                static func main() throws {
+                    SmokeHTTP1Server.runAsOperationServer(Self.init)
                 }
             }
             """)

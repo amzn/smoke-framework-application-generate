@@ -1,13 +1,10 @@
 <p align="center">
-<a href="https://travis-ci.com/amzn/smoke-framework-application-generate">
-<img src="https://travis-ci.com/amzn/smoke-framework-application-generate.svg?branch=master" alt="Build - Master Branch">
+<a href="https://github.com/amzn/smoke-framework-application-generate/actions">
+<img src="https://github.com/amzn/smoke-framework-application-generate/actions/workflows/swift.yml/badge.svg?branch=main" alt="Build - main Branch">
 </a>
 <a href="http://swift.org">
-<img src="https://img.shields.io/badge/swift-5.2|5.3|5.4-orange.svg?style=flat" alt="Swift 5.2, 5.3 and 5.4 Tested">
+<img src="https://img.shields.io/badge/swift-5.3|5.4|5.5-orange.svg?style=flat" alt="Swift 5.3, 5.4 and 5.5 Tested">
 </a>
-<img src="https://img.shields.io/badge/ubuntu-16.04|18.04|20.04-yellow.svg?style=flat" alt="Ubuntu 16.04, 18.04 and 20.04 Tested">
-<img src="https://img.shields.io/badge/CentOS-8-yellow.svg?style=flat" alt="CentOS 8 Tested">
-<img src="https://img.shields.io/badge/AmazonLinux-2-yellow.svg?style=flat" alt="Amazon Linux 2 Tested">
 <a href="https://gitter.im/SmokeServerSide">
 <img src="https://img.shields.io/badge/chat-on%20gitter-ee115e.svg?style=flat" alt="Join the Smoke Server Side community on gitter">
 </a>
@@ -43,6 +40,9 @@ Create a `smoke-framework-codegen.json` file in the directory you have created w
   "baseName" : "EmptyExample",
   "modelFilePath" : "Swagger.yaml",
   "generationType" : "serverUpdate",
+  "initializationType": "STREAMLINED",
+  "testDiscovery": "ENABLED",
+  "mainAnnotation": "ENABLED",
   "operationStubGenerationRule" : {
     "mode" : "allFunctionsWithinContext"
   }

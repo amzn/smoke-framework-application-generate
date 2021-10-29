@@ -1,5 +1,4 @@
 import XCTest
-@testable import SmokeFrameworkApplicationGenerate
 
 class CodeGenerateTests: XCTestCase {
     func testExample() {

@@ -23,7 +23,8 @@ extension ServiceModelCodeGenerator {
     /**
      Generate the stub operations handlers for the generated application.
      */
-    func generateServerOperationHandlerStubs(generationType: GenerationType, operationStubGenerationRule: OperationStubGenerationRule) {
+    func generateServerOperationHandlerStubs(generationType: GenerationType, operationStubGenerationRule: OperationStubGenerationRule,
+                                             asyncOperationStubs: CodeGenFeatureStatus) {
         let baseName = applicationDescription.baseName
         let baseFilePath = applicationDescription.baseFilePath
         let filePath = "\(baseFilePath)/Sources/\(baseName)Operations"
@@ -70,6 +71,14 @@ extension ServiceModelCodeGenerator {
             
             fileBuilder.appendLine(" */")
             
+            let asyncInfix: String
+            switch asyncOperationStubs {
+            case .disabled:
+                asyncInfix = ""
+            case .enabled:
+                asyncInfix = " async"
+            }
+            
             let operationStubGeneration = operationStubGenerationRule.getStubGeneration(forOperation: operationName)
             
             switch operationStubGeneration {
@@ -77,13 +86,13 @@ extension ServiceModelCodeGenerator {
                 if let output = output {
                     fileBuilder.appendLine("""
                         extension \(baseName)OperationsContext {
-                            public func handle\(name)(\(input))\(errors)
+                            public func handle\(name)(\(input))\(asyncInfix)\(errors)
                             \(output) {
                         """)
                 } else {
                     fileBuilder.appendLine("""
                         extension \(baseName)OperationsContext {
-                            public func handle\(name)(\(input))\(errors) {
+                            public func handle\(name)(\(input))\(asyncInfix)\(errors) {
                         """)
                 }
                 
@@ -92,12 +101,12 @@ extension ServiceModelCodeGenerator {
                 if let output = output {
                     fileBuilder.appendLine("""
                         public func handle\(name)(\(input),
-                                context: \(baseName)OperationsContext)\(errors) \(output) {
+                                context: \(baseName)OperationsContext)\(asyncInfix)\(errors) \(output) {
                         """)
                 } else {
                     fileBuilder.appendLine("""
                         public func handle\(name)(\(input),
-                                context: \(baseName)OperationsContext)\(errors) {
+                                context: \(baseName)OperationsContext)\(asyncInfix)\(errors) {
                         """)
                 }
             }

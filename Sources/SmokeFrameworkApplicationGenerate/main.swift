@@ -40,7 +40,10 @@ struct Parameters {
     var modelOverride: ConfigurationProvider<ModelOverride>?
     var generateCodeGenConfig: Bool?
     var httpClientConfiguration: ConfigurationProvider<HttpClientConfiguration>?
+    var asyncAwait: AsyncAwaitCodeGenParameters?
     var initializationType: InitializationType?
+    var testDiscovery: CodeGenFeatureStatus?
+    var mainAnnotation: CodeGenFeatureStatus?
     var operationStubGenerationRule: OperationStubGenerationRule
     var swaggerFileVersion: Int
 }
@@ -86,7 +89,10 @@ private func startCodeGeneration(
         baseName: String, baseFilePath: String,
         applicationDescription: String, applicationSuffix: String,
         modelFilePath: String, generationType: GenerationType,
+        asyncAwait: AsyncAwaitCodeGenParameters,
         initializationType: InitializationType,
+        testDiscovery: CodeGenFeatureStatus,
+        mainAnnotation: CodeGenFeatureStatus,
         operationStubGenerationRule: OperationStubGenerationRule,
         modelOverride: ModelOverride?,
     swaggerFileVersion: Int) throws -> ServiceModel {
@@ -97,7 +103,7 @@ private func startCodeGeneration(
     let customizations = CodeGenerationCustomizations(
         validationErrorDeclaration: validationErrorDeclaration,
         unrecognizedErrorDeclaration: unrecognizedErrorDeclaration,
-        asyncAwaitGeneration: .none,
+        asyncAwaitAPIs: asyncAwait.clientAPIs,
         generateModelShapeConversions: true,
         optionalsInitializeEmpty: true,
         fileHeader: nil,
@@ -117,7 +123,10 @@ private func startCodeGeneration(
             customizations: customizations,
             applicationDescription: fullApplicationDescription,
             operationStubGenerationRule: operationStubGenerationRule,
+            asyncOperationStubs: asyncAwait.asyncOperationStubs,
             initializationType: initializationType,
+            testDiscovery: testDiscovery,
+            mainAnnotation: mainAnnotation,
             modelOverride: modelOverride)
     } else if swaggerFileVersion == 2 {
         return try SmokeFrameworkCodeGeneration.generateFromModel(
@@ -127,7 +136,10 @@ private func startCodeGeneration(
             customizations: customizations,
             applicationDescription: fullApplicationDescription,
             operationStubGenerationRule: operationStubGenerationRule,
+            asyncOperationStubs: asyncAwait.asyncOperationStubs,
             initializationType: initializationType,
+            testDiscovery: testDiscovery,
+            mainAnnotation: mainAnnotation,
             modelOverride: modelOverride)
     } else {
         fatalError("Invalid swagger version.")
@@ -178,7 +190,10 @@ func handleApplication(parameters: Parameters) throws {
         applicationDescription: applicationDescription,
         applicationSuffix: applicationSuffix, modelFilePath: parameters.modelFilePath,
         generationType: parameters.generationType,
+        asyncAwait: parameters.asyncAwait ?? .default,
         initializationType: parameters.initializationType ?? .original,
+        testDiscovery: parameters.testDiscovery ?? .disabled,
+        mainAnnotation: parameters.mainAnnotation ?? .disabled,
         operationStubGenerationRule: parameters.operationStubGenerationRule,
         modelOverride: modelOverride, swaggerFileVersion: parameters.swaggerFileVersion)
     
@@ -204,7 +219,10 @@ func handleApplication(parameters: Parameters) throws {
                                                           applicationDescription: parameters.applicationDescription,
                                                           modelOverride: modelOverride,
                                                           httpClientConfiguration: httpClientConfigurationOptional,
+                                                          asyncAwait: parameters.asyncAwait,
                                                           initializationType: parameters.initializationType,
+                                                          testDiscovery: parameters.testDiscovery,
+                                                          mainAnnotation: parameters.mainAnnotation,
                                                           operationStubGenerationRule: .allFunctionsWithinContextExceptStandaloneFunctionsFor(existingOperations.sorted(by: <)))
         
         let jsonEncoder = JSONEncoder()
@@ -374,7 +392,10 @@ struct SmokeFrameworkApplicationGenerateCommand: ParsableCommand {
             modelOverride: modelOverride,
             generateCodeGenConfig: generateCodeGenConfig ?? false,
             httpClientConfiguration: httpClientConfiguration,
+            asyncAwait: config?.asyncAwait,
             initializationType: config?.initializationType,
+            testDiscovery: config?.testDiscovery,
+            mainAnnotation: config?.mainAnnotation,
             operationStubGenerationRule: operationStubGenerationRule,
             swaggerFileVersion: theSwaggerVersion)
         
