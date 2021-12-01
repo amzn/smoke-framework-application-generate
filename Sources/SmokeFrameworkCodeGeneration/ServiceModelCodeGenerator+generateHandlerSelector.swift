@@ -43,7 +43,8 @@ extension ServiceModelCodeGenerator {
             import \(baseName)Operations
             import SmokeOperations
             import SmokeOperationsHTTP1
-            
+            import SmokeAsyncHTTP1
+
             """)
         
         fileBuilder.appendLine("""
