@@ -24,7 +24,8 @@ extension ServiceModelCodeGenerator {
      Generate the hander selector for the operation handlers for the generated application.
      */
     func generateServerHanderSelector(operationStubGenerationRule: OperationStubGenerationRule,
-                                      initializationType: InitializationType) {
+                                      initializationType: InitializationType,
+                                      eventLoopFutureOperationHandlers: CodeGenFeatureStatus) {
         
         let fileBuilder = FileBuilder()
         let baseName = applicationDescription.baseName
@@ -43,9 +44,17 @@ extension ServiceModelCodeGenerator {
             import \(baseName)Operations
             import SmokeOperations
             import SmokeOperationsHTTP1
-            import SmokeAsyncHTTP1
 
             """)
+        
+        if eventLoopFutureOperationHandlers == .enabled {
+            fileBuilder.appendLine("""
+                import SmokeAsyncHTTP1
+                """)
+        } else {
+            fileBuilder.appendLine("""
+                """)
+        }
         
         fileBuilder.appendLine("""
             extension \(baseName)ModelOperations: OperationIdentity {}

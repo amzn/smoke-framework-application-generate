@@ -128,6 +128,7 @@ public struct SmokeFrameworkCodeGeneration {
         applicationDescription: ApplicationDescription,
         operationStubGenerationRule: OperationStubGenerationRule,
         asyncOperationStubs: CodeGenFeatureStatus,
+        eventLoopFutureOperationHandlers: CodeGenFeatureStatus,
         initializationType: InitializationType,
         testDiscovery: CodeGenFeatureStatus,
         mainAnnotation: CodeGenFeatureStatus,
@@ -142,7 +143,8 @@ public struct SmokeFrameworkCodeGeneration {
                                                     mainAnnotation: mainAnnotation,
                                                     asyncInitialization: asyncInitialization,
                                                     operationStubGenerationRule: operationStubGenerationRule,
-                                                    asyncOperationStubs: asyncOperationStubs)
+                                                    asyncOperationStubs: asyncOperationStubs,
+                                                    eventLoopFutureOperationHandlers: eventLoopFutureOperationHandlers)
             }
         
             return try ServiceModelGenerate.generateFromModel(
@@ -164,7 +166,8 @@ extension ServiceModelCodeGenerator {
                                                     mainAnnotation: CodeGenFeatureStatus,
                                                     asyncInitialization: CodeGenFeatureStatus,
                                                     operationStubGenerationRule: OperationStubGenerationRule,
-                                                    asyncOperationStubs: CodeGenFeatureStatus) throws {
+                                                    asyncOperationStubs: CodeGenFeatureStatus,
+                                                    eventLoopFutureOperationHandlers: CodeGenFeatureStatus) throws {
         let clientProtocolDelegate = ClientProtocolDelegate(
             baseName: applicationDescription.baseName,
             asyncAwaitAPIs: asyncAwaitClientAPIs)
@@ -185,7 +188,8 @@ extension ServiceModelCodeGenerator {
         generateServerOperationHandlerStubs(generationType: generationType, operationStubGenerationRule: operationStubGenerationRule,
                                             asyncOperationStubs: asyncOperationStubs)
         generateServerHanderSelector(operationStubGenerationRule: operationStubGenerationRule,
-                                     initializationType: initializationType)
+                                     initializationType: initializationType,
+                                     eventLoopFutureOperationHandlers: eventLoopFutureOperationHandlers)
         generateServerApplicationFiles(generationType: generationType, asyncOperationStubs: asyncOperationStubs,
                                        mainAnnotation: mainAnnotation)
         generateOperationsContext(generationType: generationType)

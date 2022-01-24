@@ -28,6 +28,7 @@ struct SmokeFrameworkCodeGen: Codable {
     let modelOverride: ModelOverride?
     let httpClientConfiguration: HttpClientConfiguration?
     let asyncAwait: AsyncAwaitCodeGenParameters?
+    let eventLoopFutureOperationHandlers: CodeGenFeatureStatus?
     let initializationType: InitializationType?
     let testDiscovery: CodeGenFeatureStatus?
     let mainAnnotation: CodeGenFeatureStatus?
