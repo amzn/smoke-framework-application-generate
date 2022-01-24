@@ -15,7 +15,7 @@
         "repositoryURL": "https://github.com/amzn/service-model-swift-code-generate.git",
         "state": {
           "branch": "main",
-          "revision": "58ea14b91fabf1052dd01f3c617415de7636d1ea",
+          "revision": "6e4710b64c54cf91530b0438b6635f34877e56a5",
           "version": null
         }
       },
@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/amzn/smoke-aws-generate.git",
         "state": {
           "branch": "main",
-          "revision": "80c231a52d89c2fc316c8969b1840814219c1a67",
+          "revision": "b7750e69e09f0b357f102a6ad7eb8b35edf7c11a",
           "version": null
         }
       },
@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
           "branch": null,
-          "revision": "83b23d940471b313427da226196661856f6ba3e0",
-          "version": "0.4.4"
+          "revision": "6b2aa2748a7881eebb9f84fb10c01293e15b52ca",
+          "version": "0.5.0"
         }
       },
       {

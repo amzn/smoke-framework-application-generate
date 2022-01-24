@@ -24,12 +24,14 @@ extension ServiceModelCodeGenerator {
      */
     func generateOperationsContextGenerator(generationType: GenerationType,
                                             initializationType: InitializationType,
-                                            mainAnnotation: CodeGenFeatureStatus) {
+                                            mainAnnotation: CodeGenFeatureStatus,
+                                            asyncInitialization: CodeGenFeatureStatus) {
         switch initializationType {
         case .original:
             generateOriginalOperationsContextGenerator(generationType: generationType, mainAnnotation: mainAnnotation)
         case .streamlined:
-            generateStreamlinedOperationsContextGenerator(generationType: generationType, mainAnnotation: mainAnnotation)
+            generateStreamlinedOperationsContextGenerator(generationType: generationType, mainAnnotation: mainAnnotation,
+                                                          asyncInitialization: asyncInitialization)
         }
     }
     
@@ -125,8 +127,10 @@ extension ServiceModelCodeGenerator {
     }
     
     private func generateStreamlinedOperationsContextGenerator(generationType: GenerationType,
-                                                               mainAnnotation: CodeGenFeatureStatus) {
-        generateStreamlinedOperationsContextProtocolGenerator(generationType: generationType)
+                                                               mainAnnotation: CodeGenFeatureStatus,
+                                                               asyncInitialization: CodeGenFeatureStatus) {
+        generateStreamlinedOperationsContextProtocolGenerator(generationType: generationType,
+                                                              asyncInitialization: asyncInitialization)
         
         let fileBuilder = FileBuilder()
         let baseName = applicationDescription.baseName
@@ -198,7 +202,8 @@ extension ServiceModelCodeGenerator {
         fileBuilder.write(toFile: fileName, atFilePath: filePath)
     }
     
-    private func generateStreamlinedOperationsContextProtocolGenerator(generationType: GenerationType) {
+    private func generateStreamlinedOperationsContextProtocolGenerator(generationType: GenerationType,
+                                                                       asyncInitialization: CodeGenFeatureStatus) {
         
         let fileBuilder = FileBuilder()
         let baseName = applicationDescription.baseName
@@ -207,6 +212,20 @@ extension ServiceModelCodeGenerator {
         
         let fileName = "\(baseName)PerInvocationContextInitializerProtocol.swift"
         let filePath = "\(baseFilePath)/Sources/\(baseName)OperationsHTTP1"
+        
+        let baseInitializerInfix: String
+        let asyncPrefix: String
+        let awaitPrefix: String
+        switch asyncInitialization {
+        case .disabled:
+            baseInitializerInfix = ""
+            asyncPrefix = ""
+            awaitPrefix = ""
+        case .enabled:
+            baseInitializerInfix = "Async"
+            asyncPrefix = "async "
+            awaitPrefix = "await "
+        }
         
         fileBuilder.appendLine("""
             //
@@ -223,9 +242,9 @@ extension ServiceModelCodeGenerator {
             /**
              Convenience protocol for the initialization of \(baseName)\(applicationSuffix).
              */
-            public protocol \(baseName)PerInvocationContextInitializerProtocol: StandardJSONSmokeServerPerInvocationContextInitializer
+            public protocol \(baseName)PerInvocationContextInitializerProtocol: StandardJSONSmoke\(baseInitializerInfix)ServerPerInvocationContextInitializer
             where ContextType == \(baseName)OperationsContext, OperationIdentifer == \(baseName)ModelOperations {
-                init(eventLoopGroup: EventLoopGroup) throws
+                init(eventLoopGroup: EventLoopGroup) \(asyncPrefix)throws
             }
             
             public extension \(baseName)PerInvocationContextInitializerProtocol {
@@ -238,8 +257,8 @@ extension ServiceModelCodeGenerator {
                     return "\(baseName)\(applicationSuffix)"
                 }
             
-                static func main() throws {
-                    SmokeHTTP1Server.runAsOperationServer(Self.init)
+                static func main() \(asyncPrefix)throws {
+                    \(awaitPrefix)SmokeHTTP1Server.runAsOperationServer(Self.init)
                 }
             }
             """)

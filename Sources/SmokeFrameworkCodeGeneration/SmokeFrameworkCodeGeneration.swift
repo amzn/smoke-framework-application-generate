@@ -131,6 +131,7 @@ public struct SmokeFrameworkCodeGeneration {
         initializationType: InitializationType,
         testDiscovery: CodeGenFeatureStatus,
         mainAnnotation: CodeGenFeatureStatus,
+        asyncInitialization: CodeGenFeatureStatus,
         modelOverride: ModelOverride?) throws -> ModelType {
             func generatorFunction(codeGenerator: ServiceModelCodeGenerator,
                                    serviceModel: ModelType) throws {
@@ -139,6 +140,7 @@ public struct SmokeFrameworkCodeGeneration {
                                                     initializationType: initializationType,
                                                     testDiscovery: testDiscovery,
                                                     mainAnnotation: mainAnnotation,
+                                                    asyncInitialization: asyncInitialization,
                                                     operationStubGenerationRule: operationStubGenerationRule,
                                                     asyncOperationStubs: asyncOperationStubs)
             }
@@ -160,6 +162,7 @@ extension ServiceModelCodeGenerator {
                                                     initializationType: InitializationType,
                                                     testDiscovery: CodeGenFeatureStatus,
                                                     mainAnnotation: CodeGenFeatureStatus,
+                                                    asyncInitialization: CodeGenFeatureStatus,
                                                     operationStubGenerationRule: OperationStubGenerationRule,
                                                     asyncOperationStubs: CodeGenFeatureStatus) throws {
         let clientProtocolDelegate = ClientProtocolDelegate(
@@ -187,7 +190,7 @@ extension ServiceModelCodeGenerator {
                                        mainAnnotation: mainAnnotation)
         generateOperationsContext(generationType: generationType)
         generateOperationsContextGenerator(generationType: generationType, initializationType: initializationType,
-                                           mainAnnotation: mainAnnotation)
+                                           mainAnnotation: mainAnnotation, asyncInitialization: asyncInitialization)
         generateOperationTests(generationType: generationType, operationStubGenerationRule: operationStubGenerationRule,
                                asyncOperationStubs: asyncOperationStubs, testDiscovery: testDiscovery)
         generateTestConfiguration(generationType: generationType)
