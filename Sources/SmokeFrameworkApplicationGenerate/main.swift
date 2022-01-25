@@ -41,6 +41,7 @@ struct Parameters {
     var generateCodeGenConfig: Bool?
     var httpClientConfiguration: ConfigurationProvider<HttpClientConfiguration>?
     var asyncAwait: AsyncAwaitCodeGenParameters?
+    var eventLoopFutureOperationHandlers: CodeGenFeatureStatus?
     var initializationType: InitializationType?
     var testDiscovery: CodeGenFeatureStatus?
     var mainAnnotation: CodeGenFeatureStatus?
@@ -90,12 +91,13 @@ private func startCodeGeneration(
         applicationDescription: String, applicationSuffix: String,
         modelFilePath: String, generationType: GenerationType,
         asyncAwait: AsyncAwaitCodeGenParameters,
+        eventLoopFutureOperationHandlers: CodeGenFeatureStatus,
         initializationType: InitializationType,
         testDiscovery: CodeGenFeatureStatus,
         mainAnnotation: CodeGenFeatureStatus,
         operationStubGenerationRule: OperationStubGenerationRule,
         modelOverride: ModelOverride?,
-    swaggerFileVersion: Int) throws -> ServiceModel {
+        swaggerFileVersion: Int) throws -> ServiceModel {
     let validationErrorDeclaration = ErrorDeclaration.external(
         libraryImport: "SmokeOperations",
         errorType: "SmokeOperationsError")
@@ -124,9 +126,11 @@ private func startCodeGeneration(
             applicationDescription: fullApplicationDescription,
             operationStubGenerationRule: operationStubGenerationRule,
             asyncOperationStubs: asyncAwait.asyncOperationStubs,
+            eventLoopFutureOperationHandlers: eventLoopFutureOperationHandlers,
             initializationType: initializationType,
             testDiscovery: testDiscovery,
             mainAnnotation: mainAnnotation,
+            asyncInitialization: asyncAwait.asyncInitialization,
             modelOverride: modelOverride)
     } else if swaggerFileVersion == 2 {
         return try SmokeFrameworkCodeGeneration.generateFromModel(
@@ -137,9 +141,11 @@ private func startCodeGeneration(
             applicationDescription: fullApplicationDescription,
             operationStubGenerationRule: operationStubGenerationRule,
             asyncOperationStubs: asyncAwait.asyncOperationStubs,
+            eventLoopFutureOperationHandlers: eventLoopFutureOperationHandlers,
             initializationType: initializationType,
             testDiscovery: testDiscovery,
             mainAnnotation: mainAnnotation,
+            asyncInitialization: asyncAwait.asyncInitialization,
             modelOverride: modelOverride)
     } else {
         fatalError("Invalid swagger version.")
@@ -191,6 +197,7 @@ func handleApplication(parameters: Parameters) throws {
         applicationSuffix: applicationSuffix, modelFilePath: parameters.modelFilePath,
         generationType: parameters.generationType,
         asyncAwait: parameters.asyncAwait ?? .default,
+        eventLoopFutureOperationHandlers: parameters.eventLoopFutureOperationHandlers ?? .disabled,
         initializationType: parameters.initializationType ?? .original,
         testDiscovery: parameters.testDiscovery ?? .disabled,
         mainAnnotation: parameters.mainAnnotation ?? .disabled,
@@ -220,6 +227,7 @@ func handleApplication(parameters: Parameters) throws {
                                                           modelOverride: modelOverride,
                                                           httpClientConfiguration: httpClientConfigurationOptional,
                                                           asyncAwait: parameters.asyncAwait,
+                                                          eventLoopFutureOperationHandlers: parameters.eventLoopFutureOperationHandlers,
                                                           initializationType: parameters.initializationType,
                                                           testDiscovery: parameters.testDiscovery,
                                                           mainAnnotation: parameters.mainAnnotation,
@@ -393,6 +401,7 @@ struct SmokeFrameworkApplicationGenerateCommand: ParsableCommand {
             generateCodeGenConfig: generateCodeGenConfig ?? false,
             httpClientConfiguration: httpClientConfiguration,
             asyncAwait: config?.asyncAwait,
+            eventLoopFutureOperationHandlers: config?.eventLoopFutureOperationHandlers,
             initializationType: config?.initializationType,
             testDiscovery: config?.testDiscovery,
             mainAnnotation: config?.mainAnnotation,

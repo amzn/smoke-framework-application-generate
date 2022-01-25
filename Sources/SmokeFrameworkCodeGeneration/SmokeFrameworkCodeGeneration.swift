@@ -128,9 +128,11 @@ public struct SmokeFrameworkCodeGeneration {
         applicationDescription: ApplicationDescription,
         operationStubGenerationRule: OperationStubGenerationRule,
         asyncOperationStubs: CodeGenFeatureStatus,
+        eventLoopFutureOperationHandlers: CodeGenFeatureStatus,
         initializationType: InitializationType,
         testDiscovery: CodeGenFeatureStatus,
         mainAnnotation: CodeGenFeatureStatus,
+        asyncInitialization: CodeGenFeatureStatus,
         modelOverride: ModelOverride?) throws -> ModelType {
             func generatorFunction(codeGenerator: ServiceModelCodeGenerator,
                                    serviceModel: ModelType) throws {
@@ -139,8 +141,10 @@ public struct SmokeFrameworkCodeGeneration {
                                                     initializationType: initializationType,
                                                     testDiscovery: testDiscovery,
                                                     mainAnnotation: mainAnnotation,
+                                                    asyncInitialization: asyncInitialization,
                                                     operationStubGenerationRule: operationStubGenerationRule,
-                                                    asyncOperationStubs: asyncOperationStubs)
+                                                    asyncOperationStubs: asyncOperationStubs,
+                                                    eventLoopFutureOperationHandlers: eventLoopFutureOperationHandlers)
             }
         
             return try ServiceModelGenerate.generateFromModel(
@@ -160,8 +164,10 @@ extension ServiceModelCodeGenerator {
                                                     initializationType: InitializationType,
                                                     testDiscovery: CodeGenFeatureStatus,
                                                     mainAnnotation: CodeGenFeatureStatus,
+                                                    asyncInitialization: CodeGenFeatureStatus,
                                                     operationStubGenerationRule: OperationStubGenerationRule,
-                                                    asyncOperationStubs: CodeGenFeatureStatus) throws {
+                                                    asyncOperationStubs: CodeGenFeatureStatus,
+                                                    eventLoopFutureOperationHandlers: CodeGenFeatureStatus) throws {
         let clientProtocolDelegate = ClientProtocolDelegate(
             baseName: applicationDescription.baseName,
             asyncAwaitAPIs: asyncAwaitClientAPIs)
@@ -182,12 +188,13 @@ extension ServiceModelCodeGenerator {
         generateServerOperationHandlerStubs(generationType: generationType, operationStubGenerationRule: operationStubGenerationRule,
                                             asyncOperationStubs: asyncOperationStubs)
         generateServerHanderSelector(operationStubGenerationRule: operationStubGenerationRule,
-                                     initializationType: initializationType)
+                                     initializationType: initializationType,
+                                     eventLoopFutureOperationHandlers: eventLoopFutureOperationHandlers)
         generateServerApplicationFiles(generationType: generationType, asyncOperationStubs: asyncOperationStubs,
                                        mainAnnotation: mainAnnotation)
         generateOperationsContext(generationType: generationType)
         generateOperationsContextGenerator(generationType: generationType, initializationType: initializationType,
-                                           mainAnnotation: mainAnnotation)
+                                           mainAnnotation: mainAnnotation, asyncInitialization: asyncInitialization)
         generateOperationTests(generationType: generationType, operationStubGenerationRule: operationStubGenerationRule,
                                asyncOperationStubs: asyncOperationStubs, testDiscovery: testDiscovery)
         generateTestConfiguration(generationType: generationType)

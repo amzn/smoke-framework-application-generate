@@ -9,18 +9,13 @@ import ServiceModelCodeGeneration
 
 struct AsyncAwaitCodeGenParameters: Codable {
     let clientAPIs: CodeGenFeatureStatus
-    // Allow server async/await support when XCTest supports it
-    // https://github.com/apple/swift-corelibs-xctest/pull/331
-    //let asyncOperationStubs: AsyncAwaitSupport
+    let asyncOperationStubs: CodeGenFeatureStatus
+    let asyncInitialization: CodeGenFeatureStatus
 
     static var `default`: AsyncAwaitCodeGenParameters {
-        return AsyncAwaitCodeGenParameters(clientAPIs: .enabled)
-    }
-}
-
-extension AsyncAwaitCodeGenParameters {
-    var asyncOperationStubs: CodeGenFeatureStatus {
-        return .disabled
+        return AsyncAwaitCodeGenParameters(clientAPIs: .enabled,
+                                           asyncOperationStubs: .enabled,
+                                           asyncInitialization: .disabled)
     }
 }
 
@@ -33,6 +28,7 @@ struct SmokeFrameworkCodeGen: Codable {
     let modelOverride: ModelOverride?
     let httpClientConfiguration: HttpClientConfiguration?
     let asyncAwait: AsyncAwaitCodeGenParameters?
+    let eventLoopFutureOperationHandlers: CodeGenFeatureStatus?
     let initializationType: InitializationType?
     let testDiscovery: CodeGenFeatureStatus?
     let mainAnnotation: CodeGenFeatureStatus?
