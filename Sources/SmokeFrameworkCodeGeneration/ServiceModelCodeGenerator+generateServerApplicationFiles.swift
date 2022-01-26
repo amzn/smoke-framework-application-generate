@@ -81,17 +81,6 @@ extension ServiceModelCodeGenerator {
             }
         }
         
-        let macOSVersion: String
-        let iOSVersion: String
-        switch asyncOperationStubs {
-        case .disabled:
-            macOSVersion = ".v10_15"
-            iOSVersion = ".v10"
-        case .enabled:
-            macOSVersion = ".v12"
-            iOSVersion = ".v15"
-        }
-        
         fileBuilder.appendLine("""
             // swift-tools-version:5.5
             // The swift-tools-version declares the minimum version of Swift required to build this package.
@@ -101,7 +90,7 @@ extension ServiceModelCodeGenerator {
             let package = Package(
                 name: "\(baseName)",
                 platforms: [
-                  .macOS(\(macOSVersion)), .iOS(\(iOSVersion))
+                  .macOS(.v10_15), .iOS(.v10)
                 ],
                 products: [
                     // Products define the executables and libraries produced by a package, and make them visible to other packages.
