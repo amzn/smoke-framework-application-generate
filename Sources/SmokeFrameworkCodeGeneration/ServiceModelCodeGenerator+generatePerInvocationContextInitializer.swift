@@ -146,6 +146,14 @@ extension ServiceModelCodeGenerator {
             }
         }
         
+        let asyncPrefix: String
+        switch asyncInitialization {
+        case .disabled:
+            asyncPrefix = ""
+        case .enabled:
+            asyncPrefix = "async "
+        }
+        
         fileBuilder.appendLine("""
             //
             // \(baseName)PerInvocationContextInitializer.swift
@@ -176,7 +184,7 @@ extension ServiceModelCodeGenerator {
                 /**
                  On application startup.
                  */
-                init(eventLoopGroup: EventLoopGroup) throws {
+                init(eventLoopGroup: EventLoopGroup) \(asyncPrefix)throws {
                     CloudwatchStandardErrorLogger.enableLogging()
             
                     // TODO: Add additional application initialization
@@ -193,7 +201,7 @@ extension ServiceModelCodeGenerator {
                 /**
                  On application shutdown.
                 */
-                func onShutdown() throws {
+                func onShutdown() \(asyncPrefix)throws {
                     
                 }
             }

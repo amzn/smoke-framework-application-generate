@@ -44,12 +44,12 @@ extension ServiceModelCodeGenerator {
             import \(baseName)Operations
             import SmokeOperations
             import SmokeOperationsHTTP1
-
             """)
         
         if eventLoopFutureOperationHandlers == .enabled {
             fileBuilder.appendLine("""
                 import SmokeAsyncHTTP1
+                
                 """)
         } else {
             fileBuilder.appendLine("""

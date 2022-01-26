@@ -130,7 +130,7 @@ private func startCodeGeneration(
             initializationType: initializationType,
             testDiscovery: testDiscovery,
             mainAnnotation: mainAnnotation,
-            asyncInitialization: asyncAwait.asyncInitialization,
+            asyncInitialization: asyncAwait.asyncInitialization ?? .disabled,
             modelOverride: modelOverride)
     } else if swaggerFileVersion == 2 {
         return try SmokeFrameworkCodeGeneration.generateFromModel(
@@ -145,7 +145,7 @@ private func startCodeGeneration(
             initializationType: initializationType,
             testDiscovery: testDiscovery,
             mainAnnotation: mainAnnotation,
-            asyncInitialization: asyncAwait.asyncInitialization,
+            asyncInitialization: asyncAwait.asyncInitialization ?? .disabled,
             modelOverride: modelOverride)
     } else {
         fatalError("Invalid swagger version.")
