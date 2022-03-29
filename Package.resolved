@@ -3,29 +3,29 @@
     "pins": [
       {
         "package": "OpenAPIKit",
-        "repositoryURL": "https://github.com/mndzup/OpenAPIKit.git",
+        "repositoryURL": "https://github.com/mattpolzin/OpenAPIKit.git",
         "state": {
-          "branch": "main",
-          "revision": "4f406328cb4543fe9d27325949f01914ca2c9863",
-          "version": null
+          "branch": null,
+          "revision": "0c668112f9803c1858ed070f9e8ce84922a0b41f",
+          "version": "3.0.0-alpha.4"
         }
       },
       {
         "package": "ServiceModelSwiftCodeGenerate",
         "repositoryURL": "https://github.com/amzn/service-model-swift-code-generate.git",
         "state": {
-          "branch": "main",
-          "revision": "6e4710b64c54cf91530b0438b6635f34877e56a5",
-          "version": null
+          "branch": null,
+          "revision": "286181816fccc2b6ec92049ba68426d08cbe0059",
+          "version": "3.0.0-beta.1"
         }
       },
       {
         "package": "SmokeAWSGenerate",
         "repositoryURL": "https://github.com/amzn/smoke-aws-generate.git",
         "state": {
-          "branch": "main",
-          "revision": "b7750e69e09f0b357f102a6ad7eb8b35edf7c11a",
-          "version": null
+          "branch": null,
+          "revision": "2d2902403408d4c7a9f6c69c90975cc048759f95",
+          "version": "3.0.0-beta.1"
         }
       },
       {
