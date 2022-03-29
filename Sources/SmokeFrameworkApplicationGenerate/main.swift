@@ -132,7 +132,7 @@ private func startCodeGeneration(
             initializationType: initializationType,
             testDiscovery: testDiscovery,
             mainAnnotation: mainAnnotation,
-            asyncInitialization: asyncAwait.asyncInitialization,
+            asyncInitialization: asyncAwait.asyncInitialization ?? .disabled,
             modelOverride: modelOverride)
     case .swagger:
         return try SmokeFrameworkCodeGeneration.generateFromModel(
@@ -147,7 +147,7 @@ private func startCodeGeneration(
             initializationType: initializationType,
             testDiscovery: testDiscovery,
             mainAnnotation: mainAnnotation,
-            asyncInitialization: asyncAwait.asyncInitialization,
+            asyncInitialization: asyncAwait.asyncInitialization ?? .disabled,
             modelOverride: modelOverride)
     }
 }
