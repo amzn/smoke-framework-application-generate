@@ -1,4 +1,4 @@
-// swift-tools-version:5.6
+// swift-tools-version:5.4
 //
 // Copyright 2019-2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 //
@@ -27,15 +27,6 @@ let package = Package(
         .library(
             name: "SmokeFrameworkCodeGeneration",
             targets: ["SmokeFrameworkCodeGeneration"]),
-        .plugin(
-            name: "SmokeFrameworkGenerateModel",
-            targets: ["SmokeFrameworkGenerateModel"]),
-        .plugin(
-            name: "SmokeFrameworkGenerateClient",
-            targets: ["SmokeFrameworkGenerateClient"]),
-        .plugin(
-            name: "SmokeFrameworkGenerateHttp1",
-            targets: ["SmokeFrameworkGenerateHttp1"]),
     ],
     dependencies: [
         .package(url: "https://github.com/amzn/smoke-aws-generate.git", from: "3.0.0-beta.1"),
@@ -43,21 +34,6 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
     ],
     targets: [
-        .plugin(
-            name: "SmokeFrameworkGenerateModel",
-            capability: .buildTool(),
-            dependencies: ["SmokeFrameworkApplicationGenerate"]
-        ),
-        .plugin(
-            name: "SmokeFrameworkGenerateClient",
-            capability: .buildTool(),
-            dependencies: ["SmokeFrameworkApplicationGenerate"]
-        ),
-        .plugin(
-            name: "SmokeFrameworkGenerateHttp1",
-            capability: .buildTool(),
-            dependencies: ["SmokeFrameworkApplicationGenerate"]
-        ),
         .executableTarget(
             name: "SmokeFrameworkApplicationGenerate", dependencies: [
                 .target(name: "SmokeFrameworkCodeGeneration"),

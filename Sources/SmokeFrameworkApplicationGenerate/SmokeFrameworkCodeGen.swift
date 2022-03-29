@@ -19,8 +19,14 @@ struct AsyncAwaitCodeGenParameters: Codable {
     }
 }
 
+enum ModelFormat: String, Codable {
+    case swagger = "SWAGGER"
+    case openAPI30 = "OPENAPI3_0"
+}
+
 struct SmokeFrameworkCodeGen: Codable {
     let modelFilePath: String
+    let modelFormat: ModelFormat?
     let baseName: String
     let applicationSuffix: String?
     let generationType: GenerationType
