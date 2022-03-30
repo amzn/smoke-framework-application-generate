@@ -43,7 +43,7 @@ extension ServiceModelCodeGenerator {
         let fileName = "main.swift"
         let filePath = "\(baseFilePath)/Sources/\(baseName)\(applicationSuffix)"
         
-        if case .serverUpdate = generationType {
+        if generationType.isUpdate {
             guard !FileManager.default.fileExists(atPath: "\(filePath)/\(fileName)") else {
                 return
             }
@@ -73,14 +73,14 @@ extension ServiceModelCodeGenerator {
         
         let fileName = "Package.swift"
         
-        if case .serverUpdate = generationType {
+        if generationType.isUpdate {
             guard !FileManager.default.fileExists(atPath: "\(baseFilePath)/\(fileName)") else {
                 return
             }
         }
         
         fileBuilder.appendLine("""
-            // swift-tools-version:5.5
+            // swift-tools-version:5.6
             // The swift-tools-version declares the minimum version of Swift required to build this package.
 
             import PackageDescription
@@ -113,6 +113,15 @@ extension ServiceModelCodeGenerator {
                     .package(url: "https://github.com/amzn/smoke-aws-credentials.git", from: "2.0.0"),
                     .package(url: "https://github.com/amzn/smoke-aws.git", from: "2.0.0"),
                     .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
+            """)
+        
+        if case .serverWithPlugin = generationType {
+            fileBuilder.appendLine("""
+                        .package(url: "https://github.com/amzn/smoke-framework-application-generate", from: "3.0.0-beta.1")
+                """)
+        }
+        
+        fileBuilder.appendLine("""
                     ],
                 targets: [
                     // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -121,6 +130,17 @@ extension ServiceModelCodeGenerator {
                         name: "\(baseName)Model", dependencies: [
                             .product(name: "SmokeOperations", package: "smoke-framework"),
                             .product(name: "Logging", package: "swift-log"),
+            """)
+        
+        if case .serverWithPlugin = generationType {
+            fileBuilder.appendLine("""
+                            ],
+                            plugins: [
+                                .plugin(name: "SmokeFrameworkGenerateModel", package: "smoke-framework-application-generate")
+                """)
+        }
+        
+        fileBuilder.appendLine("""
                         ]),
                     .target(
                         name: "\(baseName)Operations", dependencies: [
@@ -131,12 +151,34 @@ extension ServiceModelCodeGenerator {
                             .target(name: "\(baseName)Operations"),
                             .product(name: "SmokeOperationsHTTP1", package: "smoke-framework"),
                             .product(name: "SmokeOperationsHTTP1Server", package: "smoke-framework"),
+            """)
+        
+        if case .serverWithPlugin = generationType {
+            fileBuilder.appendLine("""
+                            ],
+                            plugins: [
+                                .plugin(name: "SmokeFrameworkGenerateHttp1", package: "smoke-framework-application-generate")
+                """)
+        }
+        
+        fileBuilder.appendLine("""
                         ]),
                     .target(
                         name: "\(baseName)Client", dependencies: [
                             .target(name: "\(baseName)Model"),
                             .product(name: "SmokeOperationsHTTP1", package: "smoke-framework"),
                             .product(name: "SmokeAWSHttp", package: "smoke-aws"),
+            """)
+        
+        if case .serverWithPlugin = generationType {
+            fileBuilder.appendLine("""
+                            ],
+                            plugins: [
+                                .plugin(name: "SmokeFrameworkGenerateClient", package: "smoke-framework-application-generate")
+                """)
+        }
+        
+        fileBuilder.appendLine("""
                         ]),
                     .executableTarget(
                         name: "\(baseName)\(applicationSuffix)", dependencies: [
@@ -163,7 +205,7 @@ extension ServiceModelCodeGenerator {
         
         let fileName = ".swiftlint.yml"
         
-        if case .serverUpdate = generationType {
+        if generationType.isUpdate {
             guard !FileManager.default.fileExists(atPath: "\(baseFilePath)/\(fileName)") else {
                 return
             }
@@ -195,7 +237,7 @@ extension ServiceModelCodeGenerator {
         
         let fileName = ".gitignore"
         
-        if case .serverUpdate = generationType {
+        if generationType.isUpdate {
             guard !FileManager.default.fileExists(atPath: "\(baseFilePath)/\(fileName)") else {
                 return
             }
