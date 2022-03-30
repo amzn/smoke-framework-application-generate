@@ -60,7 +60,7 @@ This JSON file can contain the following fields-
 * **modelFormat**: Specifies the format of the provided model. `OPENAPI3_0` indicates Open API 3.0 and `SWAGGER` indicates a Swagger 2.0 model. Optional, defaults to `Swagger`.
 * **baseName**: A base name for your service (without the "Service" postfix). Required.
 * **applicationSuffix**: The suffix that is combined with the `baseName` to create the service's executable name. Defaults to `Service`.
-* **generationType**: `server` to generate a new service; `serverUpdateWithPlugin` to preserve changes to existing operation handlers while using this generator during the build process to generate model and client files. Required.
+* **generationType**: `server` to generate a new service; `serverUpdateWithPlugin` to preserve changes to existing operation handlers and generate model and client files as part of the build process. Required.
 * **applicationDescription**: A description of the application. Optional.
 * **modelOverride**: A set of overrides to apply to the model. Optional.
 * **initializationType**: `STREAMLINED` is recommended and uses a code generated initializer protocol to reduce the manual setup required. `ORIGINAL` requires additional manual initialization. Optional; defaulting to `ORIGINAL` for legacy applications.

@@ -275,6 +275,9 @@ extension ServiceModelCodeGenerator {
         }
     }
 
+    // Due to a current limitation of the SPM plugins for code generators, a placeholder Swift file
+    // is required in each package to avoid the package as being seen as empty. These files need to
+    // be a Swift file but doesn't require any particular contents.
     func generateCodeGenDummyFile(forPackagePostfix packagePostix: String,
                                   plugin: String,
                                   generationType: GenerationType) {
