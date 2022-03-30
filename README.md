@@ -266,9 +266,17 @@ For the Http1 Integration package-
 
 Delete the previously generated files in the Model, Client and Http1 Integration packages. These will now be generated at compile time using this generator.
 
-## Step 5: Add a placeholder file in these packages
+## Step 5: Update the generationType in the configuration file
 
-Due to a current limitation of the SPM plugins for code generators, a placeholder Swift file is required in each package to avoid the package as being seen as empty. These files need to be a Swift file but doesn't require any particular contents.
+Update the generationType specified in the `smoke-framework-codegen.json` file to either `serverUpdateWithPlugin` or `serverWithPlugin`. 
+
+```
+  "generationType" : "serverUpdateWithPlugin",
+```
+
+## Step 6: Manually run this generator
+
+Manually run the generator. This should create a placeholder file in each of the Model, Client and Http1 Integration packages. Due to a current limitation of the SPM plugins for code generators, a placeholder Swift file is required in each package to avoid the package as being seen as empty. These files need to be a Swift file but doesn't require any particular contents.
 
 ## License
 
