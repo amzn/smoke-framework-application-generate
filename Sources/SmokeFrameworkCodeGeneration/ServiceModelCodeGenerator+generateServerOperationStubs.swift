@@ -36,7 +36,7 @@ extension ServiceModelCodeGenerator {
             
             let fileName = "\(name).swift"
             
-            if case .serverUpdate = generationType {
+            if generationType.isUpdate {
                 guard !FileManager.default.fileExists(atPath: "\(filePath)/\(fileName)") else {
                     continue
                 }

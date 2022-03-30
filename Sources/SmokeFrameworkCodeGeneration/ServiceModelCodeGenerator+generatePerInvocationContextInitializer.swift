@@ -46,7 +46,7 @@ extension ServiceModelCodeGenerator {
         let fileName = "\(baseName)PerInvocationContextInitializer.swift"
         let filePath = "\(baseFilePath)/Sources/\(baseName)\(applicationSuffix)"
         
-        if case .serverUpdate = generationType {
+        if generationType.isUpdate {
             guard !FileManager.default.fileExists(atPath: "\(filePath)/\(fileName)") else {
                 return
             }
@@ -137,7 +137,7 @@ extension ServiceModelCodeGenerator {
         let fileName = "\(baseName)PerInvocationContextInitializer.swift"
         let filePath = "\(baseFilePath)/Sources/\(baseName)\(applicationSuffix)"
         
-        if case .serverUpdate = generationType {
+        if generationType.isUpdate {
             guard !FileManager.default.fileExists(atPath: "\(filePath)/\(fileName)") else {
                 return
             }

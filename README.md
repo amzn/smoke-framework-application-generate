@@ -38,8 +38,9 @@ Create a `smoke-framework-codegen.json` file in the directory you have created w
 ```
 {
   "baseName" : "EmptyExample",
-  "modelFilePath" : "Swagger.yaml",
-  "generationType" : "serverUpdate",
+  "modelFilePath" : "OpenAPI30.yaml",
+  "modelFormat" : "OPENAPI3_0",
+  "generationType" : "serverUpdateWithPlugin",
   "initializationType": "STREAMLINED",
   "testDiscovery": "ENABLED",
   "mainAnnotation": "ENABLED",
@@ -56,9 +57,10 @@ Create a `smoke-framework-codegen.json` file in the directory you have created w
 
 This JSON file can contain the following fields-
 * **modelFilePath**: Specifies the absolute or relative (to the base directory path) file path to the Swagger model. Required.
+* **modelFormat**: Specifies the format of the provided model. `OPENAPI3_0` indicates Open API 3.0 and `SWAGGER` indicates a Swagger 2.0 model. Optional, defaults to `Swagger`.
 * **baseName**: A base name for your service (without the "Service" postfix). Required.
 * **applicationSuffix**: The suffix that is combined with the `baseName` to create the service's executable name. Defaults to `Service`.
-* **generationType**: `server` to generate a new service; `serverUpdate` to preserve changes to existing operation handlers. Required.
+* **generationType**: `server` to generate a new service; `serverUpdateWithPlugin` to preserve changes to existing operation handlers and generate model and client files as part of the build process. Required.
 * **applicationDescription**: A description of the application. Optional.
 * **modelOverride**: A set of overrides to apply to the model. Optional.
 * **initializationType**: `STREAMLINED` is recommended and uses a code generated initializer protocol to reduce the manual setup required. `ORIGINAL` requires additional manual initialization. Optional; defaulting to `ORIGINAL` for legacy applications.
@@ -102,10 +104,10 @@ The code generator will produce a Swift Package Manager repository with the foll
 - .swiftlint
 - .gitignore
 - Sources
-  - (base-name)Client
-  - (base-name)Model
+  - (base-name)Client[1]
+  - (base-name)Model[1]
   - (base-name)Operations
-  - (base-name)OperationsHTTP1
+  - (base-name)OperationsHTTP1[1]
   - (base-name)Service
 - Tests
   - LinuxMain.swift      
@@ -119,12 +121,16 @@ A `generationType` of `serverUpdate` will not overwrite changes in these section
 * **(base-name)OperationsTests:** Stub test implementations for each operation; should be modified to test the services's logic.
 * **(base-name)Service:** Operations context initialization and shutdown code; should be modified to create the context for the current environment.
 
-The following three section contain code generated code to help the service operate but should not be manually modified. 
+The following three section contain code generated code to help the service operate. These sections will be empty if this generator is configured as an SPM plugin and otherwise should not be manually modified. 
 A `generationType` of `serverUpdate` will overwrite changes in these sections-
 
 * **(base-name)Client:** APIGateway and mock clients for the service; should not be manually modified.
 * **(base-name)Client:** Input and output structures and types for the service; should not be manually modified.
 * **(base-name)Client:** Operation selection and input/output type handling specific to HTTP1; should not be manually modified.
+
+If you add additional operations at a later date, the code generator can be re-run manually to generate operation and test stubs for these new operations.
+
+[1] In the default configuration, the full contents of these packages will be generated during the build process.
 
 # Migration to using smoke-framework-codegen.json
 
@@ -189,6 +195,92 @@ extension EmptyExampleOperationsContext {
     }
 }
 ```
+
+# Migration to using the generator as an SPM Plugin
+
+Starting with Swift 5.6, this generator can be used during the build process to avoid having to check the fully code-generated model, client and http1 integration files into the source repository. This section describes the steps to migrate a Smoke-framework based application to using this generator as a plugin.
+
+This generator can still be run manually from the command line to generate operation and test stubs after adding operations to the model file. Changes to the model file that only change payload of existing operations will no longer require this generator to be run manually.
+
+## Step 1: Use build tools 5.6
+
+In order to use this generator as an SPM plugin, the application will have to use Swift tools version 5.6 and at compile with at least the Swift 5.6 compiler. At the top of the application's `Package.swift` manifest, make sure the correct Swift tools version is specified.
+
+```
+// swift-tools-version:5.6
+```
+
+## Step 2: Add a dependency on this generator
+
+Still in the `Package.swift` manifest, add a dependency on this package.
+
+```
+.package(url: "https://github.com/amzn/smoke-framework-application-generate", from: "3.0.0-beta.1")
+```
+
+## Step 3: Specific plugs for the Model, Client and Http1 Integration packages
+
+Still in the `Package.swift` manifest, add plugin declarations for the model, client and Http1 Integration packages. For example
+
+For the Model package-
+
+```
+.target(
+    name: "EmptyExampleModel", dependencies: [
+        .product(name: "SmokeOperations", package: "smoke-framework"),
+        .product(name: "Logging", package: "swift-log"),
+    ],
+    plugins: [
+        .plugin(name: "SmokeFrameworkGenerateModel", package: "smoke-framework-application-generate")
+    ]
+),
+```
+
+For the Client package-
+
+```
+.target(
+    name: "EmptyExampleClient", dependencies: [
+        .target(name: "EmptyExampleModel"),
+        .product(name: "SmokeOperationsHTTP1", package: "smoke-framework"),
+        .product(name: "SmokeAWSHttp", package: "smoke-aws"),
+    ],
+    plugins: [
+        .plugin(name: "SmokeFrameworkGenerateClient", package: "smoke-framework-application-generate")
+    ]
+),
+```
+
+For the Http1 Integration package-
+
+```
+.target(
+    name: "EmptyExampleOperationsHTTP1", dependencies: [
+        .target(name: "EmptyExampleOperations"),
+        .product(name: "SmokeOperationsHTTP1", package: "smoke-framework"),
+        .product(name: "SmokeOperationsHTTP1Server", package: "smoke-framework"),
+    ],
+    plugins: [
+        .plugin(name: "SmokeFrameworkGenerateHttp1", package: "smoke-framework-application-generate")
+    ]
+),
+```
+
+## Step 4: Delete existing files in these packages
+
+Delete the previously generated files in the Model, Client and Http1 Integration packages. These will now be generated at compile time using this generator.
+
+## Step 5: Update the generationType in the configuration file
+
+Update the generationType specified in the `smoke-framework-codegen.json` file to either `serverUpdateWithPlugin` or `serverWithPlugin`. 
+
+```
+  "generationType" : "serverUpdateWithPlugin",
+```
+
+## Step 6: Manually run this generator
+
+Manually run the generator. This should create a placeholder file in each of the Model, Client and Http1 Integration packages. Due to a current limitation of the SPM plugins for code generators, a placeholder Swift file is required in each package to avoid the package as being seen as empty. These files need to be a Swift file but doesn't require any particular contents.
 
 ## License
 

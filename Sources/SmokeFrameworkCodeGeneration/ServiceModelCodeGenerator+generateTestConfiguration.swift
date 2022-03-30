@@ -29,7 +29,7 @@ extension ServiceModelCodeGenerator {
         let fileName = "\(baseName)TestConfiguration.swift"
         let filePath = "\(baseFilePath)/Tests/\(baseName)OperationsTests"
         
-        if case .serverUpdate = generationType {
+        if generationType.isUpdate {
             guard !FileManager.default.fileExists(atPath: "\(filePath)/\(fileName)") else {
                 return
             }
