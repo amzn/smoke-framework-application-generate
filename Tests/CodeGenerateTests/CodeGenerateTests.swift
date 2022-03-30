@@ -8,9 +8,4 @@ class CodeGenerateTests: XCTestCase {
     func executionPlanServiceGenerate() {
         
     }
-
-    static var allTests = [
-        ("testExample", testExample),
-        ("executionPlanServiceGenerate", executionPlanServiceGenerate)
-    ]
 }

@@ -10,17 +10,23 @@ import ServiceModelCodeGeneration
 struct AsyncAwaitCodeGenParameters: Codable {
     let clientAPIs: CodeGenFeatureStatus
     let asyncOperationStubs: CodeGenFeatureStatus
-    let asyncInitialization: CodeGenFeatureStatus
+    let asyncInitialization: CodeGenFeatureStatus?
 
     static var `default`: AsyncAwaitCodeGenParameters {
         return AsyncAwaitCodeGenParameters(clientAPIs: .enabled,
                                            asyncOperationStubs: .enabled,
-                                           asyncInitialization: .disabled)
+                                           asyncInitialization: nil)
     }
+}
+
+enum ModelFormat: String, Codable {
+    case swagger = "SWAGGER"
+    case openAPI30 = "OPENAPI3_0"
 }
 
 struct SmokeFrameworkCodeGen: Codable {
     let modelFilePath: String
+    let modelFormat: ModelFormat?
     let baseName: String
     let applicationSuffix: String?
     let generationType: GenerationType

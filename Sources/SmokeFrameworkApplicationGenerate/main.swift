@@ -32,9 +32,11 @@ enum ConfigurationProvider<Type> {
 
 struct Parameters {
     var modelFilePath: String
+    var modelFormat: ModelFormat?
     var baseName: String
     var applicationSuffix: String?
     var baseFilePath: String
+    var baseOutputFilePath: String?
     var generationType: GenerationType
     var applicationDescription: String?
     var modelOverride: ConfigurationProvider<ModelOverride>?
@@ -46,7 +48,6 @@ struct Parameters {
     var testDiscovery: CodeGenFeatureStatus?
     var mainAnnotation: CodeGenFeatureStatus?
     var operationStubGenerationRule: OperationStubGenerationRule
-    var swaggerFileVersion: Int
 }
 
 private func getModelOverride(modelOverridePath: String?) throws -> ModelOverride? {
@@ -89,15 +90,15 @@ private func startCodeGeneration(
         httpClientConfiguration: HttpClientConfiguration,
         baseName: String, baseFilePath: String,
         applicationDescription: String, applicationSuffix: String,
-        modelFilePath: String, generationType: GenerationType,
+        modelFilePath: String, modelFormat: ModelFormat,
+        generationType: GenerationType,
         asyncAwait: AsyncAwaitCodeGenParameters,
         eventLoopFutureOperationHandlers: CodeGenFeatureStatus,
         initializationType: InitializationType,
         testDiscovery: CodeGenFeatureStatus,
         mainAnnotation: CodeGenFeatureStatus,
         operationStubGenerationRule: OperationStubGenerationRule,
-        modelOverride: ModelOverride?,
-        swaggerFileVersion: Int) throws -> ServiceModel {
+        modelOverride: ModelOverride?) throws -> ServiceModel {
     let validationErrorDeclaration = ErrorDeclaration.external(
         libraryImport: "SmokeOperations",
         errorType: "SmokeOperationsError")
@@ -117,7 +118,8 @@ private func startCodeGeneration(
         applicationDescription: applicationDescription,
         applicationSuffix: applicationSuffix)
     
-    if swaggerFileVersion == 3 {
+    switch modelFormat {
+    case .openAPI30:
         return try SmokeFrameworkCodeGeneration.generateFromModel(
             modelFilePath: modelFilePath,
             modelType: OpenAPIServiceModel.self,
@@ -130,9 +132,9 @@ private func startCodeGeneration(
             initializationType: initializationType,
             testDiscovery: testDiscovery,
             mainAnnotation: mainAnnotation,
-            asyncInitialization: asyncAwait.asyncInitialization,
+            asyncInitialization: asyncAwait.asyncInitialization ?? .disabled,
             modelOverride: modelOverride)
-    } else if swaggerFileVersion == 2 {
+    case .swagger:
         return try SmokeFrameworkCodeGeneration.generateFromModel(
             modelFilePath: modelFilePath,
             modelType: SwaggerServiceModel.self,
@@ -145,10 +147,8 @@ private func startCodeGeneration(
             initializationType: initializationType,
             testDiscovery: testDiscovery,
             mainAnnotation: mainAnnotation,
-            asyncInitialization: asyncAwait.asyncInitialization,
+            asyncInitialization: asyncAwait.asyncInitialization ?? .disabled,
             modelOverride: modelOverride)
-    } else {
-        fatalError("Invalid swagger version.")
     }
 }
 
@@ -192,9 +192,11 @@ func handleApplication(parameters: Parameters) throws {
     
     let model = try startCodeGeneration(
         httpClientConfiguration: httpClientConfiguration,
-        baseName: parameters.baseName, baseFilePath: parameters.baseFilePath,
+        baseName: parameters.baseName,
+        baseFilePath: parameters.baseOutputFilePath ?? parameters.baseFilePath,
         applicationDescription: applicationDescription,
-        applicationSuffix: applicationSuffix, modelFilePath: parameters.modelFilePath,
+        applicationSuffix: applicationSuffix,
+        modelFilePath: parameters.modelFilePath, modelFormat: parameters.modelFormat ?? .swagger,
         generationType: parameters.generationType,
         asyncAwait: parameters.asyncAwait ?? .default,
         eventLoopFutureOperationHandlers: parameters.eventLoopFutureOperationHandlers ?? .disabled,
@@ -202,7 +204,7 @@ func handleApplication(parameters: Parameters) throws {
         testDiscovery: parameters.testDiscovery ?? .disabled,
         mainAnnotation: parameters.mainAnnotation ?? .disabled,
         operationStubGenerationRule: parameters.operationStubGenerationRule,
-        modelOverride: modelOverride, swaggerFileVersion: parameters.swaggerFileVersion)
+        modelOverride: modelOverride)
     
     if (parameters.generateCodeGenConfig ?? false) {
         let parameterModelFilePath = parameters.modelFilePath
@@ -219,7 +221,7 @@ func handleApplication(parameters: Parameters) throws {
         
         let existingOperations = Array(model.operationDescriptions.keys)
         
-        let smokeFrameworkCodeGen = SmokeFrameworkCodeGen(modelFilePath: modelFilePath,
+        let smokeFrameworkCodeGen = SmokeFrameworkCodeGen(modelFilePath: modelFilePath, modelFormat: parameters.modelFormat,
                                                           baseName: parameters.baseName,
                                                           applicationSuffix: parameters.applicationSuffix,
                                                           generationType: .serverUpdate,
@@ -269,8 +271,11 @@ struct SmokeFrameworkApplicationGenerateCommand: ParsableCommand {
     @Option(name: .customLong("application-suffix"), help: "The suffix for the generated executable. [Service]")
     var applicationSuffix: String?
     
-    @Option(name: .customLong("base-file-path"), help: "The file path to place the root of the generated Swift package.")
+    @Option(name: .customLong("base-file-path"), help: "The file path to the root of the input Swift package.")
     var baseFilePath: String
+    
+    @Option(name: .customLong("base-output-file-path"), help: "The file path to place the root of the generated Swift package.")
+    var baseOutputFilePath: String?
     
     @Option(name: .customLong("generation-type"), help: "What code to generate. (server|serverUpdate)")
     var generationType: GenerationType?
@@ -383,18 +388,26 @@ struct SmokeFrameworkApplicationGenerateCommand: ParsableCommand {
             operationStubGenerationRule = .allStandaloneFunctions
         }
         
-        let theSwaggerVersion: Int
+        let theModelFormat: ModelFormat?
         if let versionOverride = version {
-            theSwaggerVersion = versionOverride
+            if versionOverride == 2 {
+                theModelFormat = .swagger
+            } else if versionOverride == 3 {
+                theModelFormat = .openAPI30
+            } else {
+                fatalError("Unsupported swagger version '\(versionOverride)'.")
+            }
         } else {
-            theSwaggerVersion = 2
+            theModelFormat = config?.modelFormat
         }
         
         let parameters = Parameters(
             modelFilePath: theModelFilePath,
+            modelFormat: theModelFormat,
             baseName: theBaseName,
             applicationSuffix: theApplicationSuffix,
             baseFilePath: baseFilePath,
+            baseOutputFilePath: baseOutputFilePath,
             generationType: theGenerationType,
             applicationDescription: theApplicationDescription,
             modelOverride: modelOverride,
@@ -405,8 +418,7 @@ struct SmokeFrameworkApplicationGenerateCommand: ParsableCommand {
             initializationType: config?.initializationType,
             testDiscovery: config?.testDiscovery,
             mainAnnotation: config?.mainAnnotation,
-            operationStubGenerationRule: operationStubGenerationRule,
-            swaggerFileVersion: theSwaggerVersion)
+            operationStubGenerationRule: operationStubGenerationRule)
         
         try handleApplication(parameters: parameters)
     }

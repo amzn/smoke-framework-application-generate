@@ -28,6 +28,25 @@ import ArgumentParser
 public enum GenerationType: String, Codable, ExpressibleByArgument {
     case server
     case serverUpdate
+    case codeGenModel
+    case codeGenClient
+    case codeGenHttp1
+    
+    var needsModel: Bool {
+        return self == .server || self == .serverUpdate || self == .codeGenModel
+    }
+    
+    var needsClient: Bool {
+        return self == .server || self == .serverUpdate || self == .codeGenClient
+    }
+    
+    var needsHttp1: Bool {
+        return self == .server || self == .serverUpdate || self == .codeGenHttp1
+    }
+    
+    var isNotCodeGenPlugIn: Bool {
+        return self != .codeGenModel && self != .codeGenClient && self != .codeGenHttp1
+    }
 }
 
 public enum InitializationType: String, Codable {
@@ -185,38 +204,52 @@ extension ServiceModelCodeGenerator {
             defaultInvocationTraceContext: InvocationTraceContextDeclaration(name: "SmokeInvocationTraceContext", importPackage: "SmokeOperationsHTTP1"))
         let awsModelErrorsDelegate = SmokeFrameworkModelErrorsDelegate()
         
-        generateServerOperationHandlerStubs(generationType: generationType, operationStubGenerationRule: operationStubGenerationRule,
-                                            asyncOperationStubs: asyncOperationStubs)
-        generateServerHanderSelector(operationStubGenerationRule: operationStubGenerationRule,
-                                     initializationType: initializationType,
-                                     eventLoopFutureOperationHandlers: eventLoopFutureOperationHandlers)
-        generateServerApplicationFiles(generationType: generationType, asyncOperationStubs: asyncOperationStubs,
-                                       mainAnnotation: mainAnnotation)
-        generateOperationsContext(generationType: generationType)
-        generateOperationsContextGenerator(generationType: generationType, initializationType: initializationType,
-                                           mainAnnotation: mainAnnotation, asyncInitialization: asyncInitialization)
-        generateOperationTests(generationType: generationType, operationStubGenerationRule: operationStubGenerationRule,
-                               asyncOperationStubs: asyncOperationStubs, testDiscovery: testDiscovery)
-        generateTestConfiguration(generationType: generationType)
-        if case .disabled = testDiscovery {
-            generateLinuxMain()
+        if generationType.isNotCodeGenPlugIn {
+            generateServerOperationHandlerStubs(generationType: generationType, operationStubGenerationRule: operationStubGenerationRule,
+                                                asyncOperationStubs: asyncOperationStubs)
+            generateServerApplicationFiles(generationType: generationType, mainAnnotation: mainAnnotation)
+            generateOperationsContext(generationType: generationType)
+            generateOperationsContextGenerator(generationType: generationType, initializationType: initializationType,
+                                               mainAnnotation: mainAnnotation, asyncInitialization: asyncInitialization)
+            generateOperationTests(generationType: generationType, operationStubGenerationRule: operationStubGenerationRule,
+                                   asyncOperationStubs: asyncOperationStubs, testDiscovery: testDiscovery)
+            generateTestConfiguration(generationType: generationType)
+            if case .disabled = testDiscovery {
+                generateLinuxMain()
+            }
         }
         
-        generateClient(delegate: clientProtocolDelegate, isGenerator: false)
-        generateClient(delegate: mockClientDelegate, isGenerator: false)
-        generateClient(delegate: throwingClientDelegate, isGenerator: false)
-        generateClient(delegate: awsClientDelegate, isGenerator: false)
-        generateClient(delegate: awsClientDelegate, isGenerator: true)
-        generateModelOperationsEnum()
-        generateOperationsReporting()
-        generateInvocationsReporting()
-        generateModelOperationClientInput()
-        generateModelOperationClientOutput()
-        generateModelOperationHTTPInput()
-        generateModelOperationHTTPOutput()
-        generateModelStructures()
-        generateModelTypes()
-        generateModelErrors(delegate: awsModelErrorsDelegate)
-        generateDefaultInstances(generationType: .internalTypes)
+        if generationType.needsClient {
+            generateClient(delegate: clientProtocolDelegate, isGenerator: false)
+            generateClient(delegate: mockClientDelegate, isGenerator: false)
+            generateClient(delegate: throwingClientDelegate, isGenerator: false)
+            generateClient(delegate: awsClientDelegate, isGenerator: false)
+            generateClient(delegate: awsClientDelegate, isGenerator: true)
+            generateOperationsReporting()
+            generateInvocationsReporting()
+            generateModelOperationClientInput()
+            generateModelOperationClientOutput()
+        }
+        
+        if generationType.needsModel {
+            generateModelOperationsEnum()
+            generateModelStructures()
+            generateModelTypes()
+            generateModelErrors(delegate: awsModelErrorsDelegate)
+            generateDefaultInstances(generationType: .internalTypes)
+        }
+        
+        if generationType.needsHttp1 {
+            generateModelOperationHTTPInput()
+            generateModelOperationHTTPOutput()
+            generateServerHanderSelector(operationStubGenerationRule: operationStubGenerationRule,
+                                         initializationType: initializationType,
+                                         eventLoopFutureOperationHandlers: eventLoopFutureOperationHandlers)
+            
+            if initializationType == .streamlined {
+                generateStreamlinedOperationsContextProtocolGenerator(generationType: generationType,
+                                                                      asyncInitialization: asyncInitialization)
+            }
+        }
     }
 }

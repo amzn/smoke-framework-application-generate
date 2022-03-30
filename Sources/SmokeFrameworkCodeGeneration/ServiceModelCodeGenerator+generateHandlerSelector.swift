@@ -31,6 +31,8 @@ extension ServiceModelCodeGenerator {
         let baseName = applicationDescription.baseName
         let baseFilePath = applicationDescription.baseFilePath
         
+        
+        
         addGeneratedFileHeader(fileBuilder: fileBuilder)
         
         // build a map of http url to operation handler
@@ -44,15 +46,17 @@ extension ServiceModelCodeGenerator {
             import \(baseName)Operations
             import SmokeOperations
             import SmokeOperationsHTTP1
-
             """)
         
-        if eventLoopFutureOperationHandlers == .enabled {
+        switch eventLoopFutureOperationHandlers {
+        case .enabled:
             fileBuilder.appendLine("""
                 import SmokeAsyncHTTP1
+
                 """)
-        } else {
+        case .disabled:
             fileBuilder.appendLine("""
+
                 """)
         }
         

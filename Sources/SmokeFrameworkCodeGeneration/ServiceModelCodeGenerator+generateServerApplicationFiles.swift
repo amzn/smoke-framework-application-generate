@@ -24,12 +24,11 @@ extension ServiceModelCodeGenerator {
      Generate the main Swift file for the generated application as a Container Server.
      */
     func generateServerApplicationFiles(generationType: GenerationType,
-                                        asyncOperationStubs: CodeGenFeatureStatus,
                                         mainAnnotation: CodeGenFeatureStatus) {
         if case .disabled = mainAnnotation {
             generateContainerServerApplicationMain(generationType: generationType)
         }
-        generatePackageFile(generationType: generationType, asyncOperationStubs: asyncOperationStubs)
+        generatePackageFile(generationType: generationType)
         generateLintFile(generationType: generationType)
         generateGitIgnoreFile(generationType: generationType)
     }
@@ -65,8 +64,7 @@ extension ServiceModelCodeGenerator {
         fileBuilder.write(toFile: fileName, atFilePath: filePath)
     }
 
-    private func generatePackageFile(generationType: GenerationType,
-                                     asyncOperationStubs: CodeGenFeatureStatus) {
+    private func generatePackageFile(generationType: GenerationType) {
         
         let fileBuilder = FileBuilder()
         let baseName = applicationDescription.baseName
@@ -81,17 +79,6 @@ extension ServiceModelCodeGenerator {
             }
         }
         
-        let macOSVersion: String
-        let iOSVersion: String
-        switch asyncOperationStubs {
-        case .disabled:
-            macOSVersion = ".v10_15"
-            iOSVersion = ".v10"
-        case .enabled:
-            macOSVersion = ".v12"
-            iOSVersion = ".v15"
-        }
-        
         fileBuilder.appendLine("""
             // swift-tools-version:5.5
             // The swift-tools-version declares the minimum version of Swift required to build this package.
@@ -101,7 +88,7 @@ extension ServiceModelCodeGenerator {
             let package = Package(
                 name: "\(baseName)",
                 platforms: [
-                  .macOS(\(macOSVersion)), .iOS(\(iOSVersion))
+                  .macOS(.v10_15), .iOS(.v10)
                 ],
                 products: [
                     // Products define the executables and libraries produced by a package, and make them visible to other packages.

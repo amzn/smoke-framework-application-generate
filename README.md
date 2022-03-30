@@ -3,7 +3,7 @@
 <img src="https://github.com/amzn/smoke-framework-application-generate/actions/workflows/swift.yml/badge.svg?branch=main" alt="Build - main Branch">
 </a>
 <a href="http://swift.org">
-<img src="https://img.shields.io/badge/swift-5.3|5.4|5.5-orange.svg?style=flat" alt="Swift 5.3, 5.4 and 5.5 Tested">
+<img src="https://img.shields.io/badge/swift-5.4|5.5|5.6-orange.svg?style=flat" alt="Swift 5.4, 5.5 and 5.6 Tested">
 </a>
 <a href="https://gitter.im/SmokeServerSide">
 <img src="https://img.shields.io/badge/chat-on%20gitter-ee115e.svg?style=flat" alt="Join the Smoke Server Side community on gitter">
@@ -43,6 +43,11 @@ Create a `smoke-framework-codegen.json` file in the directory you have created w
   "initializationType": "STREAMLINED",
   "testDiscovery": "ENABLED",
   "mainAnnotation": "ENABLED",
+  "asyncAwait": {
+    "clientAPIs": "ENABLED",
+    "asyncOperationStubs": "ENABLED",
+    "asyncInitialization": "ENABLED"
+  },
   "operationStubGenerationRule" : {
     "mode" : "allFunctionsWithinContext"
   }
@@ -56,7 +61,12 @@ This JSON file can contain the following fields-
 * **generationType**: `server` to generate a new service; `serverUpdate` to preserve changes to existing operation handlers. Required.
 * **applicationDescription**: A description of the application. Optional.
 * **modelOverride**: A set of overrides to apply to the model. Optional.
-* **httpClientConfiguration**: Configuration for the generated http service clients. The schema for this parameOptional.
+* **initializationType**: `STREAMLINED` is recommended and uses a code generated initializer protocol to reduce the manual setup required. `ORIGINAL` requires additional manual initialization. Optional; defaulting to `ORIGINAL` for legacy applications.
+* **testDiscovery**: `ENABLED` is recommended and will not generate `LinuxMain.swift` and associated TestCase lists. `DISABLED` will code generate these. Optional; defaulting to `DISABLED` for legacy applications.
+* **mainAnnotation**: `ENABLED` is recommended and will not generate `main.swift` and will instead specify the @main annotation on the application initializer. `DISABLED` will code generate `main.swift`. Optional; defaulting to `DISABLED` for legacy applications.
+* **asyncAwait**: Specifies if 1) async client APIs will be generated, 2) operation handler stubs will be code generated as async methods and 3) if the initialization and shutdown methods can be async methods (and will code generated as such if they don't exist). Optional; by default `clientAPIs` and `asyncOperationStubs` will be enabled but `asyncInitialization` will be disabled for legacy applications. 
+* **eventLoopFutureOperationHandlers**: `ENABLED` will support the use of `EventLoopFuture`-returning operation handlers. Integration for these types of handlers are contained in the `SmokeAsyncHTTP1` product of the `smoke-framework` package. A dependency on this product will need to be added to the `\(applicationBaseName)OperationsHTTP1` product of the code generated application if this option is enabled. Optional, disabled by default.
+* **httpClientConfiguration**: Configuration for the generated http service clients. Optional.
 * **operationStubGenerationRule**: How operation stubs are generated and expected by the application. It is recommended that new applications use `allFunctionsWithinContext` which will generate operation stubs within extensions of the Context type[1].
 
 The schemas for the `modelOverride` and `httpClientConfiguration` fields can be found here - https://github.com/amzn/service-model-swift-code-generate/blob/main/Sources/ServiceModelEntities/ModelOverride.swift.

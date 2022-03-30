@@ -129,9 +129,6 @@ extension ServiceModelCodeGenerator {
     private func generateStreamlinedOperationsContextGenerator(generationType: GenerationType,
                                                                mainAnnotation: CodeGenFeatureStatus,
                                                                asyncInitialization: CodeGenFeatureStatus) {
-        generateStreamlinedOperationsContextProtocolGenerator(generationType: generationType,
-                                                              asyncInitialization: asyncInitialization)
-        
         let fileBuilder = FileBuilder()
         let baseName = applicationDescription.baseName
         let baseFilePath = applicationDescription.baseFilePath
@@ -169,6 +166,14 @@ extension ServiceModelCodeGenerator {
                 """)
         }
         
+        let asyncPrefix: String
+        switch asyncInitialization {
+        case .disabled:
+            asyncPrefix = ""
+        case .enabled:
+            asyncPrefix = "async "
+        }
+        
         fileBuilder.appendLine("""
             struct \(baseName)PerInvocationContextInitializer: \(baseName)PerInvocationContextInitializerProtocol {
                 // TODO: Add properties to be accessed by the operation handlers
@@ -176,7 +181,7 @@ extension ServiceModelCodeGenerator {
                 /**
                  On application startup.
                  */
-                init(eventLoopGroup: EventLoopGroup) throws {
+                init(eventLoopGroup: EventLoopGroup) \(asyncPrefix)throws {
                     CloudwatchStandardErrorLogger.enableLogging()
             
                     // TODO: Add additional application initialization
@@ -193,7 +198,7 @@ extension ServiceModelCodeGenerator {
                 /**
                  On application shutdown.
                 */
-                func onShutdown() throws {
+                func onShutdown() \(asyncPrefix)throws {
                     
                 }
             }
@@ -202,9 +207,8 @@ extension ServiceModelCodeGenerator {
         fileBuilder.write(toFile: fileName, atFilePath: filePath)
     }
     
-    private func generateStreamlinedOperationsContextProtocolGenerator(generationType: GenerationType,
-                                                                       asyncInitialization: CodeGenFeatureStatus) {
-        
+    public func generateStreamlinedOperationsContextProtocolGenerator(generationType: GenerationType,
+                                                                      asyncInitialization: CodeGenFeatureStatus) {
         let fileBuilder = FileBuilder()
         let baseName = applicationDescription.baseName
         let baseFilePath = applicationDescription.baseFilePath
