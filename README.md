@@ -121,12 +121,14 @@ A `generationType` of `serverUpdate` will not overwrite changes in these section
 * **(base-name)OperationsTests:** Stub test implementations for each operation; should be modified to test the services's logic.
 * **(base-name)Service:** Operations context initialization and shutdown code; should be modified to create the context for the current environment.
 
-The following three section contain code generated code to help the service operate but should not be manually modified. 
+The following three section contain code generated code to help the service operate. These sections will be empty if this generator is configured as an SPM plugin and otherwise should not be manually modified. 
 A `generationType` of `serverUpdate` will overwrite changes in these sections-
 
 * **(base-name)Client:** APIGateway and mock clients for the service; should not be manually modified.
 * **(base-name)Client:** Input and output structures and types for the service; should not be manually modified.
 * **(base-name)Client:** Operation selection and input/output type handling specific to HTTP1; should not be manually modified.
+
+If you add additional operations at a later date, the code generator can be re-run manually to generate operation and test stubs for these new operations.
 
 [1] In the default configuration, the full contents of these packages will be generated during the build process.
 
@@ -197,6 +199,8 @@ extension EmptyExampleOperationsContext {
 # Migration to using the generator as an SPM Plugin
 
 Starting with Swift 5.6, this generator can be used during the build process to avoid having to check the fully code-generated model, client and http1 integration files into the source repository. This section describes the steps to migrate a Smoke-framework based application to using this generator as a plugin.
+
+This generator can still be run manually from the command line to generate operation and test stubs after adding operations to the model file. Changes to the model file that only change payload of existing operations will no longer require this generator to be run manually.
 
 ## Step 1: Use build tools 5.6
 
