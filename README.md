@@ -215,7 +215,7 @@ In order to use this generator as an SPM plugin, the application will have to us
 Still in the `Package.swift` manifest, add a dependency on this package.
 
 ```
-.package(url: "https://github.com/amzn/smoke-framework-application-generate", from: "3.0.0-beta.1")
+.package(url: "https://github.com/amzn/smoke-framework-application-generate", from: "3.0.0-beta.3")
 ```
 
 ## Step 3: Specific plugs for the Model, Client and Http1 Integration packages

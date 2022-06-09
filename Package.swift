@@ -62,13 +62,13 @@ let package = Package(
             name: "SmokeFrameworkApplicationGenerate", dependencies: [
                 .target(name: "SmokeFrameworkCodeGeneration"),
                 .product(name: "OpenAPIServiceModel", package: "service-model-swift-code-generate"),
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]
         ),
         .target(
             name: "SmokeFrameworkCodeGeneration", dependencies: [
                 .product(name: "ServiceModelGenerate", package: "service-model-swift-code-generate"),
                 .product(name: "SmokeAWSModelGenerate", package: "smoke-aws-generate"),
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]
         ),
         .testTarget(
