@@ -34,6 +34,7 @@ let package = Package(
         .package(name: "ServiceModelSwiftCodeGenerate",
                  url: "https://github.com/amzn/service-model-swift-code-generate.git", from: "3.0.0-beta.1"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
+        .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", exact: "0.50600.1"),
     ],
     targets: [
         .executableTarget(
@@ -47,6 +48,8 @@ let package = Package(
             name: "SmokeFrameworkCodeGeneration", dependencies: [
                 .product(name: "ServiceModelGenerate", package: "ServiceModelSwiftCodeGenerate"),
                 .product(name: "SmokeAWSModelGenerate", package: "SmokeAWSGenerate"),
+                .product(name: "SwiftSyntaxBuilder", package: "SwiftSyntax"),
+                .product(name: "SwiftSyntax", package: "SwiftSyntax"),
             ]
         ),
         .testTarget(

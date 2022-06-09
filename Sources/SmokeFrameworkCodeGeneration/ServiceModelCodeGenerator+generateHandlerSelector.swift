@@ -18,6 +18,8 @@
 import Foundation
 import ServiceModelCodeGeneration
 import ServiceModelEntities
+import SwiftSyntax
+import SwiftSyntaxBuilder
 
 extension ServiceModelCodeGenerator {
     /**
@@ -30,6 +32,27 @@ extension ServiceModelCodeGenerator {
         let fileBuilder = FileBuilder()
         let baseName = applicationDescription.baseName
         let baseFilePath = applicationDescription.baseFilePath
+        
+        let source = SourceFile {
+            ImportDecl(leadingTriviaBuilder: { getGeneratedFileHeader(baseName: baseName) },
+                       path: "Foundation")
+            ImportDecl(path: "\(baseName)Model")
+            ImportDecl(path: "\(baseName)Operations")
+            ImportDecl(path: "SmokeOperations")
+            ImportDecl(path: "SmokeOperationsHTTP1")
+            
+            if case .enabled = eventLoopFutureOperationHandlers {
+                ImportDecl(path: "SmokeAsyncHTTP1")
+            }
+            
+            ExtensionDecl(extendedType: "\(baseName)ModelOperations",
+                          leadingTriviaBuilder: { TriviaPiece.newlines(1) }
+            )
+            
+            ClassDecl(classOrActorKeyword: .class, identifier: "SomeViewController", membersBuilder: {
+                VariableDecl(.let, name: "tableView", type: "UITableView")
+          })
+        }
         
         
         
@@ -104,7 +127,7 @@ extension ServiceModelCodeGenerator {
         }
         
         let fileName = "\(baseName)OperationsHanderSelector.swift"
-        fileBuilder.write(toFile: fileName, atFilePath: "\(baseFilePath)/Sources/\(baseName)OperationsHTTP1")
+        source.write(toFile: fileName, atFilePath: "\(baseFilePath)/Sources/\(baseName)OperationsHTTP1")
     }
     
     private func generateHandlerForOperation(name: String, operationDescription: OperationDescription,
@@ -149,6 +172,42 @@ extension ServiceModelCodeGenerator {
                                                     allowedErrors: allowedErrorsFor\(name.startingWithUppercase))
                     """)
             }
+        }
+    }
+}
+
+@TriviaListBuilder func getGeneratedFileHeader(baseName: String) -> ExpressibleAsTriviaPieceList {
+    TriviaPiece.docLineComment("""
+        // swiftlint:disable superfluous_disable_command
+        // swiftlint:disable file_length line_length identifier_name type_name vertical_parameter_alignment
+        // swiftlint:disable type_body_length function_body_length generic_type_name cyclomatic_complexity
+        // -- Generated Code; do not edit --
+        //
+        // \(baseName)OperationsHanderSelector.swift
+        // \(baseName)OperationsHTTP1
+        //
+        """)
+    TriviaPiece.newlines(2)
+}
+
+extension SourceFile {
+    func write(toFile fileName: String, atFilePath filePath: String) {
+        let syntax = self.buildSyntax(format: Format())
+        
+        var text = ""
+        syntax.write(to: &text)
+        
+        let fileManager = FileManager.default
+        
+        do {
+            // create any directories as needed
+            try fileManager.createDirectory(atPath: filePath,
+                                            withIntermediateDirectories: true, attributes: nil)
+            
+            // Write contents to file
+            try text.write(toFile: filePath + "/" + fileName, atomically: false, encoding: String.Encoding.utf8)
+        } catch let error as NSError {
+            print("Ooops! Something went wrong: \(error)")
         }
     }
 }

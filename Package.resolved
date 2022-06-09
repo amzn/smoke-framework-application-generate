@@ -1,61 +1,59 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "OpenAPIKit",
-        "repositoryURL": "https://github.com/mattpolzin/OpenAPIKit.git",
-        "state": {
-          "branch": null,
-          "revision": "0c668112f9803c1858ed070f9e8ce84922a0b41f",
-          "version": "3.0.0-alpha.4"
-        }
-      },
-      {
-        "package": "ServiceModelSwiftCodeGenerate",
-        "repositoryURL": "https://github.com/amzn/service-model-swift-code-generate.git",
-        "state": {
-          "branch": null,
-          "revision": "286181816fccc2b6ec92049ba68426d08cbe0059",
-          "version": "3.0.0-beta.1"
-        }
-      },
-      {
-        "package": "SmokeAWSGenerate",
-        "repositoryURL": "https://github.com/amzn/smoke-aws-generate.git",
-        "state": {
-          "branch": null,
-          "revision": "2d2902403408d4c7a9f6c69c90975cc048759f95",
-          "version": "3.0.0-beta.1"
-        }
-      },
-      {
-        "package": "SwaggerParser",
-        "repositoryURL": "https://github.com/tachyonics/SwaggerParser.git",
-        "state": {
-          "branch": null,
-          "revision": "c0eb70485c59a9d7dd6765dcd303b49fdb3040ee",
-          "version": "0.6.4"
-        }
-      },
-      {
-        "package": "swift-argument-parser",
-        "repositoryURL": "https://github.com/apple/swift-argument-parser",
-        "state": {
-          "branch": null,
-          "revision": "6b2aa2748a7881eebb9f84fb10c01293e15b52ca",
-          "version": "0.5.0"
-        }
-      },
-      {
-        "package": "Yams",
-        "repositoryURL": "https://github.com/jpsim/Yams.git",
-        "state": {
-          "branch": null,
-          "revision": "9ff1cc9327586db4e0c8f46f064b6a82ec1566fa",
-          "version": "4.0.6"
-        }
+  "pins" : [
+    {
+      "identity" : "openapikit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/mattpolzin/OpenAPIKit.git",
+      "state" : {
+        "revision" : "0c668112f9803c1858ed070f9e8ce84922a0b41f",
+        "version" : "3.0.0-alpha.4"
       }
-    ]
-  },
-  "version": 1
+    },
+    {
+      "identity" : "service-model-swift-code-generate",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/amzn/service-model-swift-code-generate.git",
+      "state" : {
+        "revision" : "286181816fccc2b6ec92049ba68426d08cbe0059",
+        "version" : "3.0.0-beta.1"
+      }
+    },
+    {
+      "identity" : "smoke-aws-generate",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/amzn/smoke-aws-generate.git",
+      "state" : {
+        "revision" : "2d2902403408d4c7a9f6c69c90975cc048759f95",
+        "version" : "3.0.0-beta.1"
+      }
+    },
+    {
+      "identity" : "swaggerparser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tachyonics/SwaggerParser.git",
+      "state" : {
+        "revision" : "c0eb70485c59a9d7dd6765dcd303b49fdb3040ee",
+        "version" : "0.6.4"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "revision" : "6b2aa2748a7881eebb9f84fb10c01293e15b52ca",
+        "version" : "0.5.0"
+      }
+    },
+    {
+      "identity" : "yams",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jpsim/Yams.git",
+      "state" : {
+        "revision" : "9ff1cc9327586db4e0c8f46f064b6a82ec1566fa",
+        "version" : "4.0.6"
+      }
+    }
+  ],
+  "version" : 2
 }
