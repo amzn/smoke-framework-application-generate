@@ -59,7 +59,7 @@ public protocol IdentiferFinalizedExtension: ExtensionBuildable {
 }
 
 public extension IdentiferFinalizedExtension {
-    func Inherits(_ typeName: ExpressibleAsTypeBuildable) -> some IdentiferFinalizedExtension {
+    func ConformsTo(_ typeName: ExpressibleAsTypeBuildable) -> some IdentiferFinalizedExtension {
         let inheritanceClause = TypeInheritanceClause {
             InheritedType(typeName: "OperationIdentity")
           }
@@ -69,8 +69,8 @@ public extension IdentiferFinalizedExtension {
         return context
     }
     
-    func Inherits(_ typeName: ExpressibleAsTypeBuildable,
-                  @MemberDeclListBuilder membersBuilder: @escaping () -> ExpressibleAsMemberDeclList) -> some ExtensionBuildable {
+    func ConformsTo(_ typeName: ExpressibleAsTypeBuildable,
+                    @MemberDeclListBuilder membersBuilder: @escaping () -> ExpressibleAsMemberDeclList) -> some ExtensionBuildable {
         let inheritanceClause = TypeInheritanceClause {
             InheritedType(typeName: "OperationIdentity")
           }
