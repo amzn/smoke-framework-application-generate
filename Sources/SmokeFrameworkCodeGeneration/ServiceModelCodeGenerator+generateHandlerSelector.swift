@@ -47,7 +47,7 @@ extension ServiceModelCodeGenerator {
             }
             
             EmptyLine()
-            Public.Extension("\(baseName)ModelOperations").Inherits("OperationIdentity")
+            Extension("\(baseName)ModelOperations").Inherits("OperationIdentity")
             
             EmptyLine()
             Public.Extension("\(baseName)ModelOperations") {

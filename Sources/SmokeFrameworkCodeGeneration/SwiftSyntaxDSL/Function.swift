@@ -23,7 +23,7 @@ public struct FunctionContext: IdentiferFinalizedFunction {
     public let staticSyntax: TokenSyntax?
     public var genericParameters: [GenericParameter]
     public var functionParameters: [FunctionParameter]
-    public var genericRequirements: [GenericRequirement]
+    public var genericRequirementBodies: [SyntaxBuildable]
     public var bodyBuilder: () -> CodeBlockItemList?
 }
 
@@ -33,7 +33,7 @@ public extension StaticContext {
                                staticSyntax: self.staticSyntax,
                                genericParameters: [],
                                functionParameters: [],
-                               genericRequirements: [],
+                               genericRequirementBodies: [],
                                bodyBuilder: { CodeBlockItemList([]) })
     }
     
@@ -42,7 +42,7 @@ public extension StaticContext {
                                staticSyntax: self.staticSyntax,
                                genericParameters: [],
                                functionParameters: [],
-                               genericRequirements: [],
+                               genericRequirementBodies: [],
                                bodyBuilder: { CodeBlockItemList([]) })
     }
 }
@@ -126,33 +126,31 @@ public extension GenericsFinalizedFunction {
 }
 
 public protocol WhereFinalizedFunction: FunctionBuildable {
-    var genericRequirements: [GenericRequirement] { get set }
+    var genericRequirementBodies: [SyntaxBuildable] { get set }
     var bodyBuilder: () -> CodeBlockItemList? { get set }
 }
 
 public extension WhereFinalizedFunction {
     func Where(_ left: ExpressibleAsTypeBuildable, isSameAs right: ExpressibleAsTypeBuildable) -> some WhereFinalizedFunction {
-        let genericRequirement = GenericRequirement(body: SameTypeRequirement(leftTypeIdentifier: left,
-                                                                              equalityToken: " == ".asToken(),
-                                                                              rightTypeIdentifier: right
+        let genericRequirementBody = SameTypeRequirement(leftTypeIdentifier: left,
+                                                         equalityToken: " == ".asToken(),
+                                                         rightTypeIdentifier: right
                                                                              )
-        )
         
         var context = self
-        context.genericRequirements += [genericRequirement]
+        context.genericRequirementBodies += [genericRequirementBody]
         return context
     }
     
     func Where(_ left: ExpressibleAsTypeBuildable, isSameAs right: ExpressibleAsTypeBuildable,
                @CodeBlockItemListBuilder bodyBuilder: @escaping () -> CodeBlockItemList?) -> some FunctionBuildable {
-        let genericRequirement = GenericRequirement(body: SameTypeRequirement(leftTypeIdentifier: left,
-                                                                              equalityToken: " == ".asToken(),
-                                                                              rightTypeIdentifier: right
+        let genericRequirementBody = SameTypeRequirement(leftTypeIdentifier: left,
+                                                         equalityToken: " == ".asToken(),
+                                                         rightTypeIdentifier: right
                                                                              )
-        )
         
         var context = self
-        context.genericRequirements += [genericRequirement]
+        context.genericRequirementBodies += [genericRequirementBody]
         context.bodyBuilder = bodyBuilder
         return context
     }
@@ -163,12 +161,17 @@ public protocol FunctionBuildable: ExpressibleAsCodeBlockItem, ExpressibleAsMemb
     var staticSyntax: TokenSyntax? { get }
     var genericParameters: [GenericParameter] { get }
     var functionParameters: [FunctionParameter] { get }
-    var genericRequirements: [GenericRequirement] { get }
+    var genericRequirementBodies: [SyntaxBuildable] { get }
     var bodyBuilder: () -> CodeBlockItemList? { get }
 }
 
 extension FunctionBuildable {
     private func createDecal() -> FunctionDecl {
+        let genericRequirements = self.genericRequirementBodies.enumerated().map { (index, body) in
+            return GenericRequirement(body: body,
+                                      trailingComma: (index == self.genericRequirementBodies.count - 1) ? nil : TokenSyntax.comma)
+        }
+        
         return FunctionDecl(identifier: self.identifier,
                             genericParameterClause: GenericParameterClause(genericParameterList: GenericParameterList(genericParameters)),
                             signature: FunctionSignature(
@@ -176,7 +179,7 @@ extension FunctionBuildable {
                                    parameterList: FunctionParameterList(functionParameters)
                                )
                             ),
-                            genericWhereClause: GenericWhereClause(requirementList: GenericRequirementList(self.genericRequirements)),
+                            genericWhereClause: GenericWhereClause(requirementList: GenericRequirementList(genericRequirements)),
                             modifiersBuilder: {
                                 if let staticSyntax = staticSyntax {
                                     staticSyntax

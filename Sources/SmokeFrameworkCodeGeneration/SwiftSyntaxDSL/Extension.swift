@@ -25,6 +25,19 @@ public struct ExtensionContext: IdentiferFinalizedExtension {
     public var inheritanceClause: ExpressibleAsTypeInheritanceClause?
 }
 
+func Extension(_ identifier: ExpressibleAsTypeBuildable) -> some IdentiferFinalizedExtension {
+    return ExtensionContext(extendedType: identifier,
+                            accessControlModiferSyntax: nil,
+                            membersBuilder: { MemberDeclList([]) })
+}
+
+func Extension(_ identifier: ExpressibleAsTypeBuildable,
+               @MemberDeclListBuilder membersBuilder: @escaping () -> ExpressibleAsMemberDeclList) -> some ExtensionBuildable {
+    return ExtensionContext(extendedType: identifier,
+                            accessControlModiferSyntax: nil,
+                            membersBuilder: membersBuilder)
+}
+
 public extension AccessControlModiferContext {
     func Extension(_ identifier: ExpressibleAsTypeBuildable) -> some IdentiferFinalizedExtension {
         return ExtensionContext(extendedType: identifier,
@@ -79,6 +92,7 @@ public protocol ExtensionBuildable: ExpressibleAsCodeBlockItem, ExpressibleAsMem
 extension ExtensionBuildable {
     private func createDecal() -> ExtensionDecl {
         return ExtensionDecl(extendedType: self.extendedType,
+                             inheritanceClause: inheritanceClause,
                              modifiersBuilder: {
                                 if let accessControlModiferSyntax = self.accessControlModiferSyntax {
                                     accessControlModiferSyntax
