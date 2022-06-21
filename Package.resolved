@@ -46,6 +46,15 @@
       }
     },
     {
+      "identity" : "swift-syntax",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tachyonics/swift-syntax",
+      "state" : {
+        "branch" : "functional_decomposition",
+        "revision" : "27c159b653fce0783aa612a56fa4d3e5fdda5a16"
+      }
+    },
+    {
       "identity" : "yams",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/jpsim/Yams.git",
