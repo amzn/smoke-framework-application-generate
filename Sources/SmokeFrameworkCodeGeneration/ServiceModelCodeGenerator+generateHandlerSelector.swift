@@ -34,24 +34,40 @@ extension ServiceModelCodeGenerator {
         let baseFilePath = applicationDescription.baseFilePath
         
         let source = SourceFile {
-            ImportDecl(leadingTriviaBuilder: { getGeneratedFileHeader(baseName: baseName) },
-                       path: "Foundation")
-            ImportDecl(path: "\(baseName)Model")
-            ImportDecl(path: "\(baseName)Operations")
-            ImportDecl(path: "SmokeOperations")
-            ImportDecl(path: "SmokeOperationsHTTP1")
+            Comments { getGeneratedFileHeader(baseName: baseName) }
+            EmptyLine()
+            Import("Foundation")
+            Import("\(baseName)Model")
+            Import("\(baseName)Operations")
+            Import("SmokeOperations")
+            Import("SmokeOperationsHTTP1")
             
             if case .enabled = eventLoopFutureOperationHandlers {
-                ImportDecl(path: "SmokeAsyncHTTP1")
+                Import("SmokeAsyncHTTP1")
             }
             
-            ExtensionDecl(extendedType: "\(baseName)ModelOperations",
-                          leadingTriviaBuilder: { TriviaPiece.newlines(1) }
-            )
+            EmptyLine()
+            Public.Extension("\(baseName)ModelOperations").Inherits("OperationIdentity")
             
-            ClassDecl(classOrActorKeyword: .class, identifier: "SomeViewController", membersBuilder: {
-                VariableDecl(.let, name: "tableView", type: "UITableView")
-          })
+            EmptyLine()
+            Public.Extension("\(baseName)ModelOperations") {
+                Static.Function("addToSmokeServer").GenericFor("SelectorType", extending: "SmokeHTTP1HandlerSelector")
+                    .Input("selector", whichIsA: Inout("SelectorType"))
+                    .Where("SelectorType.ContextType", isSameAs: "PlaybackObjectsOperationsContext")
+                    .Where("SelectorType.OperationIdentifer", isSameAs: "PlaybackObjectsModelOperations") {
+                        // sort the operations in alphabetical order for output
+                        let sortedOperations = model.operationDescriptions.sorted { entry1, entry2 in
+                            return entry1.key < entry2.key
+                        }
+                        
+                        // iterate through the operations
+                        for entry in sortedOperations {
+                            generateHandlerForOperationBuilder(
+                                name: entry.key, operationDescription: entry.value, baseName: baseName,
+                                fileBuilder: fileBuilder, operationStubGenerationRule: operationStubGenerationRule)
+                        }
+                    }
+            }
         }
         
         
@@ -130,6 +146,13 @@ extension ServiceModelCodeGenerator {
         source.write(toFile: fileName, atFilePath: "\(baseFilePath)/Sources/\(baseName)OperationsHTTP1")
     }
     
+    @CodeBlockItemListBuilder
+    private func generateHandlerForOperationBuilder(name: String, operationDescription: OperationDescription,
+                                                    baseName: String, fileBuilder: FileBuilder,
+                                                    operationStubGenerationRule: OperationStubGenerationRule) -> ExpressibleAsCodeBlockItemList {
+        
+    }
+    
     private func generateHandlerForOperation(name: String, operationDescription: OperationDescription,
                                              baseName: String, fileBuilder: FileBuilder,
                                              operationStubGenerationRule: OperationStubGenerationRule) {
@@ -187,7 +210,6 @@ extension ServiceModelCodeGenerator {
         // \(baseName)OperationsHTTP1
         //
         """)
-    TriviaPiece.newlines(2)
 }
 
 extension SourceFile {
