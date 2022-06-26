@@ -93,13 +93,15 @@ extension ExtensionBuildable {
     private func createDecal() -> ExtensionDecl {
         return ExtensionDecl(extendedType: self.extendedType,
                              inheritanceClause: inheritanceClause,
+                             members: MemberDeclBlock(leftBrace: TokenSyntax.`leftBrace`
+                                                        .withLeadingTrivia(.spaces(1)),
+                                                      members: self.membersBuilder(),
+                                                      rightBrace: TokenSyntax.`rightBrace`),
                              modifiersBuilder: {
                                 if let accessControlModiferSyntax = self.accessControlModiferSyntax {
                                     accessControlModiferSyntax
                                 }
-                             },
-                             membersBuilder: self.membersBuilder
-                             )
+                             })
     }
     
     public func createSyntaxBuildable() -> SyntaxBuildable {

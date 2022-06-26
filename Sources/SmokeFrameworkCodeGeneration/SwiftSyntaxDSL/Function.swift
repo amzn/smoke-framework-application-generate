@@ -172,20 +172,34 @@ extension FunctionBuildable {
                                       trailingComma: (index == self.genericRequirementBodies.count - 1) ? nil : TokenSyntax.comma)
         }
         
+        let body: CodeBlock?
+        if let builtBody = self.bodyBuilder() {
+            body = CodeBlock(leftBrace: TokenSyntax.`leftBrace`
+                                .withLeadingTrivia(.spaces(1)),
+                             statements: builtBody,
+                             rightBrace: TokenSyntax.`rightBrace`)
+        } else {
+            body = nil
+        }
+        
         return FunctionDecl(identifier: self.identifier,
-                            genericParameterClause: GenericParameterClause(genericParameterList: GenericParameterList(genericParameters)),
+                            genericParameterClause: GenericParameterClause(leftAngleBracket: SyntaxFactory.makeLeftAngleToken(),
+                                                                           genericParameterList: GenericParameterList(genericParameters),
+                                                                           rightAngleBracket: SyntaxFactory.makeRightAngleToken()),
                             signature: FunctionSignature(
                                input: ParameterClause(
                                    parameterList: FunctionParameterList(functionParameters)
                                )
                             ),
-                            genericWhereClause: GenericWhereClause(requirementList: GenericRequirementList(genericRequirements)),
+                            genericWhereClause: GenericWhereClause(whereKeyword: TokenSyntax.`where`
+                                                                       .withLeadingTrivia(.spaces(1)),
+                                                                   requirementList: GenericRequirementList(genericRequirements)),
+                            body: body,
                             modifiersBuilder: {
                                 if let staticSyntax = staticSyntax {
                                     staticSyntax
                                 }
-                            },
-                            bodyBuilder: self.bodyBuilder)
+                            })
     }
     
     public func createSyntaxBuildable() -> SyntaxBuildable {
@@ -200,3 +214,10 @@ extension FunctionBuildable {
         return MemberDeclListItem(decl: createDecal())
     }
 }
+
+/*
+ MemberDeclBlock(leftBrace: TokenSyntax.`leftBrace`
+                            .withLeadingTrivia(.spaces(1)),
+                          members: self.membersBuilder(),
+                          rightBrace: TokenSyntax.`rightBrace`)
+ */
