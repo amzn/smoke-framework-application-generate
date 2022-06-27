@@ -77,31 +77,26 @@ extension ServiceModelCodeGenerator {
     private func generateHandlerForOperationBuilder(name: String, operationDescription: OperationDescription,
                                                     baseName: String,
                                                     operationStubGenerationRule: OperationStubGenerationRule) -> ExpressibleAsCodeBlockItemList {
-        EmptyLine()
-/*        if let httpMethod = operationDescription.httpVerb {
+        if let _ = operationDescription.httpVerb {
             let sortedErrors = operationDescription.errors.sorted { entry1, entry2 in
                 return entry1.code < entry2.code
             }
-        
-            var allowedErrors = ""
-            for (index, error) in sortedErrors.enumerated() {
+            
+            let errorTuples: [TupleWithBuildable] = sortedErrors.map { error in
                 let errorName = error.type.normalizedErrorName
                 
-                if index == 0 {
-                    allowedErrors += "(.\(errorName), \(error.code))"
-                } else {
-                    allowedErrors += ", (.\(errorName), \(error.code))"
-                }
+                return TupleWith(".\(errorName)").And(Literal(error.code))
             }
             
+            EmptyLine()
+            
+            Let("allowedErrorsFor\(name.startingWithUppercase)").WithType(ArrayOf.TupleOf("\(baseName)ErrorTypes").And(IntType))
+                .WithValue(ArrayWith(contentsOf: errorTuples))
+        }
+/*        if let httpMethod = operationDescription.httpVerb {
             let operationStubGeneration = operationStubGenerationRule.getStubGeneration(forOperation: name)
 
             let internalName = name.upperToLowerCamelCase
-            
-/           fileBuilder.appendLine("""
-                
-                let allowedErrorsFor\(name.startingWithUppercase): [(\(baseName)ErrorTypes, Int)] = [\(allowedErrors)]
-                """)
             
             switch operationStubGeneration {
             case .functionWithinContext:
