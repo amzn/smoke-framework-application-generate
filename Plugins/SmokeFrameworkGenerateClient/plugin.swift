@@ -8,14 +8,36 @@ enum PluginError: Error {
     case unknownModelTargetDependency(packageName: String, targetName: String)
     case sourceModuleTargetRequired(packageName: String, targetName: String, type: Target.Type)
     case unknownModelFilePath(packageName: String, targetName: String, fileName: String)
+    case missingConfigFile(expectedPath: String)
+    case missingModelLocation(target: String)
 }
 
 @main
 struct SmokeFrameworkGenerateClientPlugin: BuildToolPlugin {
-    struct SmokeFrameworkCodeGen: Codable {
+    struct ModelLocation: Decodable {
         let modelProductDependency: String?
         let modelTargetDependency: String?
         let modelFilePath: String
+    }
+    
+    struct ModelLocations: Decodable {
+        let `default`: ModelLocation?
+        let targetMap: [String: ModelLocation]
+        
+        enum CodingKeys: String, CodingKey {
+            case `default`
+        }
+        
+        init(from decoder: Decoder) throws {
+            let values = try decoder.container(keyedBy: CodingKeys.self)
+            self.`default` = try values.decodeIfPresent(ModelLocation.self, forKey: .default)
+            self.targetMap = try [String: ModelLocation].init(from: decoder)
+        }
+    }
+    
+    struct SmokeFrameworkCodeGen: Decodable {
+        let modelLocations: ModelLocations?
+        let modelFilePath: String? // legacy location
     }
     
     /// This plugin's implementation returns a single build command which
@@ -32,7 +54,8 @@ struct SmokeFrameworkGenerateClientPlugin: BuildToolPlugin {
         
         let inputFile = context.package.directory.appending("smoke-framework-codegen.json")
         
-        let modelFilePathOverride = try getModelFilePathOverride(target: target, configFilePath: inputFile.string)
+        let modelFilePathOverride = try getModelFilePathOverride(target: target, configFilePath: inputFile.string,
+                                                                 baseFilePath: context.package.directory)
         
         let clientDirectory = sourcesDirectory.appending("\(baseName)\(targetSuffix)")
         
@@ -53,15 +76,12 @@ struct SmokeFrameworkGenerateClientPlugin: BuildToolPlugin {
         let outputFiles = clientOutputPaths
 
         // Construct the command arguments.
-        var commandArgs = [
+        let commandArgs = [
             "--base-file-path", context.package.directory.description,
             "--base-output-file-path", context.pluginWorkDirectory.description,
-            "--generation-type", "codeGenClient"
+            "--generation-type", "codeGenClient",
+            "--model-path", modelFilePathOverride
         ]
-        
-        if let modelFilePathOverride = modelFilePathOverride {
-            commandArgs.append(contentsOf: ["--model-path", modelFilePathOverride])
-        }
 
         // Append a command containing the information we generated.
         let command: Command = .buildCommand(
@@ -74,18 +94,43 @@ struct SmokeFrameworkGenerateClientPlugin: BuildToolPlugin {
         return [command]
     }
     
-    private func getModelFilePathOverride(target: Target, configFilePath: String) throws -> String? {
+    private func getModelFilePathOverride(target: Target, configFilePath: String,
+                                          baseFilePath: PackagePlugin.Path) throws -> String {
         let configFile = FileHandle(forReadingAtPath: configFilePath)
         
-        let config: SmokeFrameworkCodeGen?
-        if let configData = configFile?.readDataToEndOfFile() {
-            config = try JSONDecoder().decode(SmokeFrameworkCodeGen.self, from: configData)
+        guard let configData = configFile?.readDataToEndOfFile() else {
+            throw PluginError.missingConfigFile(expectedPath: configFilePath)
+        }
+        
+        let config = try JSONDecoder().decode(SmokeFrameworkCodeGen.self, from: configData)
+        
+        // find the model for the current target
+        let filteredModelLocations = config.modelLocations?.targetMap.compactMap { (targetName, modelLocation) -> ModelLocation? in
+            if targetName == target.name {
+                return modelLocation
+            }
+            
+            return nil
+        }
+        
+        let modelLocation: ModelLocation
+        if let theModelLocation = filteredModelLocations?.first {
+            modelLocation = theModelLocation
+        } else if let theModelLocation = config.modelLocations?.default {
+            modelLocation = theModelLocation
+        } else if let modelFilePath = config.modelFilePath {
+            modelLocation = ModelLocation(modelProductDependency: nil, modelTargetDependency: nil, modelFilePath: modelFilePath)
         } else {
-            config = nil
+            throw PluginError.missingModelLocation(target: target.name)
         }
                 
+        return try getModelFilePathOverride(target: target, modelLocation: modelLocation, baseFilePath: baseFilePath)
+    }
+    
+    private func getModelFilePathOverride(target: Target, modelLocation: ModelLocation,
+                                          baseFilePath: PackagePlugin.Path) throws -> String {
         // if the model is in a dependency
-        if let config = config, let modelProductDependency = config.modelProductDependency {
+        if let modelProductDependency = modelLocation.modelProductDependency {
             let dependencies: [Product] = target.dependencies.compactMap { dependency in
                 if case .product(let product) = dependency, product.name == modelProductDependency {
                     return product
@@ -99,7 +144,7 @@ struct SmokeFrameworkGenerateClientPlugin: BuildToolPlugin {
                 throw PluginError.unknownModelPackageDependency(packageName: modelProductDependency)
             }
             
-            let modelTargetDependency = config.modelTargetDependency ?? modelProductDependency
+            let modelTargetDependency = modelLocation.modelTargetDependency ?? modelProductDependency
             
             let filteredTargets = modelProduct.targets.filter { $0.name == modelTargetDependency }
             guard let modelTarget = filteredTargets.first else {
@@ -121,16 +166,17 @@ struct SmokeFrameworkGenerateClientPlugin: BuildToolPlugin {
                 targetDirectory = rawTargetDirectory
             }
                   
-            let filteredFiles = modelTarget.sourceFiles.filter { $0.path.string.dropFirst(targetDirectory.count) == config.modelFilePath }
+            let filteredFiles = modelTarget.sourceFiles.filter { $0.path.string.dropFirst(targetDirectory.count) == modelLocation.modelFilePath }
             guard let modelFile = filteredFiles.first else {
                 throw PluginError.unknownModelFilePath(packageName: modelProductDependency,
                                                        targetName: modelTargetDependency,
-                                                       fileName: config.modelFilePath)
+                                                       fileName: modelLocation.modelFilePath)
             }
             
             return modelFile.path.string
         }
         
-        return nil
+        // the model is local to the package
+        return baseFilePath.appending(modelLocation.modelFilePath).description
     }
 }
