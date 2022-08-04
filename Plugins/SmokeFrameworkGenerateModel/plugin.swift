@@ -99,16 +99,10 @@ struct SmokeFrameworkGenerateModelPlugin: BuildToolPlugin {
     private func getModelFilePathOverride(target: Target, config: SmokeFrameworkCodeGen,
                                           baseFilePath: PackagePlugin.Path) throws -> String {
         // find the model for the current target
-        let filteredModelLocations = config.modelLocations?.targetMap.compactMap { (targetName, modelLocation) -> ModelLocation? in
-            if targetName == target.name {
-                return modelLocation
-            }
-            
-            return nil
-        }
+        let targetModelLocationOptional = config.modelLocations?.targetMap[target.name]
         
         let modelLocation: ModelLocation
-        if let theModelLocation = filteredModelLocations?.first {
+        if let theModelLocation = targetModelLocationOptional {
             modelLocation = theModelLocation
         } else if let theModelLocation = config.modelLocations?.default {
             modelLocation = theModelLocation

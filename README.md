@@ -341,15 +341,39 @@ and then as a dependency of any targets you are using the SPM plugin for.
 
 ## Step 3: Update the code generation configuration file
 
-Finally, in the `smoke-framework-codegen.json` configuration file, add the `modelProductDependency` field to specify where the model is located.
+Finally, in the `smoke-framework-codegen.json` configuration file, add a `modelsLocation` block to specify where the model is 
+located, removing the `modelFilePath` field at the top level.
 
 ```
 {
-  "baseName" : "EmptyService",
-  "modelProductDependency": "MyModelPackage",
-  "modelFilePath" : "Swagger.yaml",
-  "generationType" : "serverUpdateWithPlugin",
-  ...
+    "baseName" : "EmptyService",
+    "modelLocations": {
+        "default": {
+            "modelProductDependency": "MyModelPackage",
+            "modelFilePath" : "Swagger.yaml"
+        }
+    },
+    ...
+}
+```
+
+If you need to specify a separate model path for a particular target, you can also add this in the `modelsLocation` block.
+
+```
+{
+    "baseName" : "EmptyService",
+    "modelLocations": {
+        "EmptyServiceExternalModel": {
+            "modelProductDependency": "MyModelPackage2",
+            "modelFilePath" : "Swagger.yaml"
+        }
+        "default": {
+            "modelProductDependency": "MyModelPackage",
+            "modelFilePath" : "Swagger.yaml"
+        }
+    },
+    ...
+}
 ```
 
 By default, the name specified by the `modelProductDependency` field will be used for both the Product and the Target used by that Product
