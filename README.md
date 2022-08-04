@@ -282,6 +282,103 @@ Update the generationType specified in the `smoke-framework-codegen.json` file t
 
 Manually run the generator. This should create a placeholder file in each of the Model, Client and Http1 Integration packages. Due to a current limitation of the SPM plugins for code generators, a placeholder Swift file is required in each package to avoid the package as being seen as empty. These files need to be a Swift file but doesn't require any particular contents.
 
+# Using the generator as an SPM Plugin with an external model
+
+You can use the SPM plugin with a model defined in a seperate package by declaring that package as a dependency of the targets using the generator.
+
+## Step 1: Prepare the model package
+
+Setup the model package as a Swift package that declares the model file as a resource.
+
+```
+// swift-tools-version: 5.6
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+
+import PackageDescription
+
+let package = Package(
+    name: "MyModelPackage",
+    products: [
+        .library(
+            name: "MyModelPackage",
+            targets: ["MyModelPackage"]),
+    ],
+    targets: [
+        .target(
+            name: "MyModelPackage",
+            dependencies: [],
+            path: "configuration/api",
+            resources: [.copy("Swagger.yaml")]),
+    ]
+)
+```
+
+**Note:** If the target in this package doesn't define any Swift files, you will need to create an empty Swift file due to a current limitation in SwiftPM.
+
+## Step 2: Add the model package as a dependency
+
+Add this model package as a dependency of the package with your service code.
+
+```
+    .package(url: "https://github.com/DonnaNoble/my-model-package.git", from: "1.0.0"),
+``` 
+
+and then as a dependency of any targets you are using the SPM plugin for.
+
+```
+.target(
+    name: "EmptyExampleClient", dependencies: [
+        .target(name: "EmptyExampleModel"),
+        .product(name: "SmokeOperationsHTTP1", package: "smoke-framework"),
+        .product(name: "SmokeAWSHttp", package: "smoke-aws"),
+        .product(name: "MyModelPackage", package: "my-model-package"),
+    ],
+    plugins: [
+        .plugin(name: "SmokeFrameworkGenerateClient", package: "smoke-framework-application-generate")
+    ]
+),
+```
+
+## Step 3: Update the code generation configuration file
+
+Finally, in the `smoke-framework-codegen.json` configuration file, add a `modelsLocation` block to specify where the model is 
+located, removing the `modelFilePath` field at the top level.
+
+```
+{
+    "baseName" : "EmptyService",
+    "modelLocations": {
+        "default": {
+            "modelProductDependency": "MyModelPackage",
+            "modelFilePath" : "Swagger.yaml"
+        }
+    },
+    ...
+}
+```
+
+If you need to specify a separate model path for a particular target, you can also add this in the `modelsLocation` block.
+
+```
+{
+    "baseName" : "EmptyService",
+    "modelLocations": {
+        "EmptyServiceExternalModel": {
+            "modelProductDependency": "MyModelPackage2",
+            "modelFilePath" : "Swagger.yaml"
+        }
+        "default": {
+            "modelProductDependency": "MyModelPackage",
+            "modelFilePath" : "Swagger.yaml"
+        }
+    },
+    ...
+}
+```
+
+By default, the name specified by the `modelProductDependency` field will be used for both the Product and the Target used by that Product
+where the model file is located. If the Target has a different name, this can be specified with the `modelTargetDependency` field.
+
 ## License
 
 This library is licensed under the Apache 2.0 License.

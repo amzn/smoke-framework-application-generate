@@ -25,7 +25,7 @@ enum ModelFormat: String, Codable {
 }
 
 struct SmokeFrameworkCodeGen: Codable {
-    let modelFilePath: String
+    let modelFilePath: String?
     let modelFormat: ModelFormat?
     let baseName: String
     let applicationSuffix: String?
