@@ -36,6 +36,7 @@ struct SmokeFrameworkGenerateClientPlugin: BuildToolPlugin {
     }
     
     struct SmokeFrameworkCodeGen: Decodable {
+        let baseName: String
         let modelLocations: ModelLocations?
         let modelFilePath: String? // legacy location
     }
@@ -47,14 +48,19 @@ struct SmokeFrameworkGenerateClientPlugin: BuildToolPlugin {
         let smokeFrameworkApplicationGenerateTool = try context.tool(named: "SmokeFrameworkApplicationGenerate")
         let sourcesDirectory = context.pluginWorkDirectory.appending("Sources")
         
-        var baseName = target.name
-        if baseName.hasSuffix(targetSuffix) {
-            baseName = String(baseName.dropLast(targetSuffix.count))
+        let inputFile = context.package.directory.appending("smoke-framework-codegen.json")
+        let configFilePath = inputFile.string
+        let configFile = FileHandle(forReadingAtPath: configFilePath)
+        
+        guard let configData = configFile?.readDataToEndOfFile() else {
+            throw PluginError.missingConfigFile(expectedPath: configFilePath)
         }
         
-        let inputFile = context.package.directory.appending("smoke-framework-codegen.json")
+        let config = try JSONDecoder().decode(SmokeFrameworkCodeGen.self, from: configData)
         
-        let modelFilePathOverride = try getModelFilePathOverride(target: target, configFilePath: inputFile.string,
+        let baseName = config.baseName
+                
+        let modelFilePathOverride = try getModelFilePathOverride(target: target, config: config,
                                                                  baseFilePath: context.package.directory)
         
         let clientDirectory = sourcesDirectory.appending("\(baseName)\(targetSuffix)")
@@ -94,16 +100,8 @@ struct SmokeFrameworkGenerateClientPlugin: BuildToolPlugin {
         return [command]
     }
     
-    private func getModelFilePathOverride(target: Target, configFilePath: String,
+    private func getModelFilePathOverride(target: Target, config: SmokeFrameworkCodeGen,
                                           baseFilePath: PackagePlugin.Path) throws -> String {
-        let configFile = FileHandle(forReadingAtPath: configFilePath)
-        
-        guard let configData = configFile?.readDataToEndOfFile() else {
-            throw PluginError.missingConfigFile(expectedPath: configFilePath)
-        }
-        
-        let config = try JSONDecoder().decode(SmokeFrameworkCodeGen.self, from: configData)
-        
         // find the model for the current target
         let filteredModelLocations = config.modelLocations?.targetMap.compactMap { (targetName, modelLocation) -> ModelLocation? in
             if targetName == target.name {
