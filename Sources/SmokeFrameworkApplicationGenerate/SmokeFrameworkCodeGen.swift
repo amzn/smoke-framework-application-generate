@@ -38,5 +38,9 @@ struct SmokeFrameworkCodeGen: Codable {
     let initializationType: InitializationType?
     let testDiscovery: CodeGenFeatureStatus?
     let mainAnnotation: CodeGenFeatureStatus?
+    let addSendableConformance: CodeGenFeatureStatus?
+    let eventLoopFutureClientAPIs: CodeGenFeatureStatus?
+    let minimumCompilerSupport: MinimumCompilerSupport?
+    let clientConfigurationType: ClientConfigurationType?
     let operationStubGenerationRule: OperationStubGenerationRule
 }

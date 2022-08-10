@@ -37,6 +37,15 @@ extension ServiceModelCodeGenerator {
             }
         }
         
+        var conformingProtocols: [String] = []
+        var conformancePadding: String = ""
+        if case .enabled = self.customizations.addSendableConformance {
+            conformingProtocols.append("Sendable")
+            conformancePadding = " "
+        }
+        
+        let conformingProtocolsString = conformingProtocols.joined(separator: ", ")
+        
         fileBuilder.appendLine("""
             //
             // \(baseName)OperationsContext.swift
@@ -49,7 +58,7 @@ extension ServiceModelCodeGenerator {
             /**
              The context to be passed to each of the \(baseName) operations.
              */
-            public struct \(baseName)OperationsContext {
+            public struct \(baseName)OperationsContext \(conformingProtocolsString)\(conformancePadding){
                 let logger: Logger
                 // TODO: Add properties to be accessed by the operation handlers
             

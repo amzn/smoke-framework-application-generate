@@ -47,6 +47,10 @@ struct Parameters {
     var initializationType: InitializationType?
     var testDiscovery: CodeGenFeatureStatus?
     var mainAnnotation: CodeGenFeatureStatus?
+    var addSendableConformance: CodeGenFeatureStatus?
+    var eventLoopFutureClientAPIs: CodeGenFeatureStatus?
+    var minimumCompilerSupport: MinimumCompilerSupport?
+    var clientConfigurationType: ClientConfigurationType?
     var operationStubGenerationRule: OperationStubGenerationRule
 }
 
@@ -97,6 +101,10 @@ private func startCodeGeneration(
         initializationType: InitializationType,
         testDiscovery: CodeGenFeatureStatus,
         mainAnnotation: CodeGenFeatureStatus,
+        addSendableConformance: CodeGenFeatureStatus,
+        eventLoopFutureClientAPIs: CodeGenFeatureStatus,
+        minimumCompilerSupport: MinimumCompilerSupport,
+        clientConfigurationType: ClientConfigurationType,
         operationStubGenerationRule: OperationStubGenerationRule,
         modelOverride: ModelOverride?) throws -> ServiceModel {
     let validationErrorDeclaration = ErrorDeclaration.external(
@@ -107,6 +115,10 @@ private func startCodeGeneration(
         validationErrorDeclaration: validationErrorDeclaration,
         unrecognizedErrorDeclaration: unrecognizedErrorDeclaration,
         asyncAwaitAPIs: asyncAwait.clientAPIs,
+        eventLoopFutureClientAPIs: eventLoopFutureClientAPIs,
+        addSendableConformance: addSendableConformance,
+        minimumCompilerSupport: minimumCompilerSupport,
+        clientConfigurationType: clientConfigurationType,
         generateModelShapeConversions: true,
         optionalsInitializeEmpty: true,
         fileHeader: nil,
@@ -203,6 +215,10 @@ func handleApplication(parameters: Parameters) throws {
         initializationType: parameters.initializationType ?? .original,
         testDiscovery: parameters.testDiscovery ?? .disabled,
         mainAnnotation: parameters.mainAnnotation ?? .disabled,
+        addSendableConformance: parameters.addSendableConformance ?? .disabled,
+        eventLoopFutureClientAPIs: parameters.eventLoopFutureClientAPIs ?? .enabled,
+        minimumCompilerSupport: parameters.minimumCompilerSupport ?? .unknown,
+        clientConfigurationType: parameters.clientConfigurationType ?? .generator,
         operationStubGenerationRule: parameters.operationStubGenerationRule,
         modelOverride: modelOverride)
     
@@ -233,6 +249,10 @@ func handleApplication(parameters: Parameters) throws {
                                                           initializationType: parameters.initializationType,
                                                           testDiscovery: parameters.testDiscovery,
                                                           mainAnnotation: parameters.mainAnnotation,
+                                                          addSendableConformance: parameters.addSendableConformance,
+                                                          eventLoopFutureClientAPIs: parameters.eventLoopFutureClientAPIs,
+                                                          minimumCompilerSupport: parameters.minimumCompilerSupport,
+                                                          clientConfigurationType: parameters.clientConfigurationType,
                                                           operationStubGenerationRule: .allFunctionsWithinContextExceptStandaloneFunctionsFor(existingOperations.sorted(by: <)))
         
         let jsonEncoder = JSONEncoder()
@@ -418,6 +438,10 @@ struct SmokeFrameworkApplicationGenerateCommand: ParsableCommand {
             initializationType: config?.initializationType,
             testDiscovery: config?.testDiscovery,
             mainAnnotation: config?.mainAnnotation,
+            addSendableConformance: config?.addSendableConformance,
+            eventLoopFutureClientAPIs: config?.eventLoopFutureClientAPIs,
+            minimumCompilerSupport: config?.minimumCompilerSupport,
+            clientConfigurationType: config?.clientConfigurationType,
             operationStubGenerationRule: operationStubGenerationRule)
         
         try handleApplication(parameters: parameters)
