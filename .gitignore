@@ -1,6 +1,8 @@
 build
 .DS_Store
 .build/
-.swiftpm/
 *.xcodeproj
+.swift-version
+.swiftpm/
 *~
+.vscode/

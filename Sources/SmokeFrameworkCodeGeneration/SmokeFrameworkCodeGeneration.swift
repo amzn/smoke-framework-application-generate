@@ -167,6 +167,9 @@ public struct SmokeFrameworkCodeGeneration {
                                    serviceModel: ModelType) throws {
                 try codeGenerator.generateFromModel(serviceModel: serviceModel, generationType: generationType,
                                                     asyncAwaitClientAPIs: customizations.asyncAwaitAPIs,
+                                                    eventLoopFutureClientAPIs: customizations.eventLoopFutureClientAPIs,
+                                                    minimumCompilerSupport: customizations.minimumCompilerSupport,
+                                                    clientConfigurationType: customizations.clientConfigurationType,
                                                     initializationType: initializationType,
                                                     testDiscovery: testDiscovery,
                                                     mainAnnotation: mainAnnotation,
@@ -190,6 +193,9 @@ extension ServiceModelCodeGenerator {
     func generateFromModel<ModelType: ServiceModel>(serviceModel: ModelType,
                                                     generationType: GenerationType,
                                                     asyncAwaitClientAPIs: CodeGenFeatureStatus,
+                                                    eventLoopFutureClientAPIs: CodeGenFeatureStatus,
+                                                    minimumCompilerSupport: MinimumCompilerSupport,
+                                                    clientConfigurationType: ClientConfigurationType,
                                                     initializationType: InitializationType,
                                                     testDiscovery: CodeGenFeatureStatus,
                                                     mainAnnotation: CodeGenFeatureStatus,
@@ -199,17 +205,26 @@ extension ServiceModelCodeGenerator {
                                                     eventLoopFutureOperationHandlers: CodeGenFeatureStatus) throws {
         let clientProtocolDelegate = ClientProtocolDelegate(
             baseName: applicationDescription.baseName,
-            asyncAwaitAPIs: asyncAwaitClientAPIs)
+            asyncAwaitAPIs: asyncAwaitClientAPIs,
+            eventLoopFutureClientAPIs: eventLoopFutureClientAPIs,
+            minimumCompilerSupport: minimumCompilerSupport)
         let mockClientDelegate = MockClientDelegate(
             baseName: applicationDescription.baseName,
             isThrowingMock: false,
-            asyncAwaitAPIs: asyncAwaitClientAPIs)
+            asyncAwaitAPIs: asyncAwaitClientAPIs,
+            eventLoopFutureClientAPIs: eventLoopFutureClientAPIs,
+            minimumCompilerSupport: minimumCompilerSupport)
         let throwingClientDelegate = MockClientDelegate(
             baseName: applicationDescription.baseName,
             isThrowingMock: true,
-            asyncAwaitAPIs: asyncAwaitClientAPIs)
+            asyncAwaitAPIs: asyncAwaitClientAPIs,
+            eventLoopFutureClientAPIs: eventLoopFutureClientAPIs,
+            minimumCompilerSupport: minimumCompilerSupport)
         let awsClientDelegate = APIGatewayClientDelegate(
             baseName: applicationDescription.baseName, asyncAwaitAPIs: asyncAwaitClientAPIs,
+            addSendableConformance: customizations.addSendableConformance,
+            eventLoopFutureClientAPIs: eventLoopFutureClientAPIs,
+            minimumCompilerSupport: minimumCompilerSupport,
             contentType: "application/json", signAllHeaders: false,
             defaultInvocationTraceContext: InvocationTraceContextDeclaration(name: "SmokeInvocationTraceContext", importPackage: "SmokeOperationsHTTP1"))
         let awsModelErrorsDelegate = SmokeFrameworkModelErrorsDelegate()
@@ -230,11 +245,19 @@ extension ServiceModelCodeGenerator {
         }
         
         if generationType.needsClient {
-            generateClient(delegate: clientProtocolDelegate, isGenerator: false)
-            generateClient(delegate: mockClientDelegate, isGenerator: false)
-            generateClient(delegate: throwingClientDelegate, isGenerator: false)
-            generateClient(delegate: awsClientDelegate, isGenerator: false)
-            generateClient(delegate: awsClientDelegate, isGenerator: true)
+            let generatorFileType: ClientFileType
+            switch clientConfigurationType {
+            case .configurationObject:
+                generatorFileType = .clientConfiguration
+            case .generator:
+                generatorFileType = .clientGenerator
+            }
+            
+            generateClient(delegate: clientProtocolDelegate, fileType: .clientImplementation)
+            generateClient(delegate: mockClientDelegate, fileType: .clientImplementation)
+            generateClient(delegate: throwingClientDelegate, fileType: .clientImplementation)
+            generateClient(delegate: awsClientDelegate, fileType: .clientImplementation)
+            generateClient(delegate: awsClientDelegate, fileType: generatorFileType)
             generateOperationsReporting()
             generateInvocationsReporting()
             generateModelOperationClientInput()
