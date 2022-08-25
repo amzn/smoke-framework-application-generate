@@ -30,6 +30,7 @@ struct SmokeFrameworkCodeGen: Codable {
     let baseName: String
     let applicationSuffix: String?
     let generationType: GenerationType
+    let integrations: ServiceIntegrations?
     let applicationDescription: String?
     let modelOverride: ModelOverride?
     let httpClientConfiguration: HttpClientConfiguration?

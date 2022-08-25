@@ -59,6 +59,14 @@ public enum GenerationType: String, Codable, ExpressibleByArgument {
     }
 }
 
+public struct ServiceIntegration: Codable {
+    let contextTypeName: String?
+}
+
+public struct ServiceIntegrations: Codable {
+    let http: ServiceIntegration?
+}
+
 public enum InitializationType: String, Codable {
     case original = "ORIGINAL"
     case streamlined = "STREAMLINED"
@@ -153,6 +161,7 @@ public struct SmokeFrameworkCodeGeneration {
         modelFilePath: String,
         modelType: ModelType.Type,
         generationType: GenerationType,
+        integrations: ServiceIntegrations?,
         customizations: CodeGenerationCustomizations,
         applicationDescription: ApplicationDescription,
         operationStubGenerationRule: OperationStubGenerationRule,
@@ -166,6 +175,7 @@ public struct SmokeFrameworkCodeGeneration {
             func generatorFunction(codeGenerator: ServiceModelCodeGenerator,
                                    serviceModel: ModelType) throws {
                 try codeGenerator.generateFromModel(serviceModel: serviceModel, generationType: generationType,
+                                                    integrations: integrations,
                                                     asyncAwaitClientAPIs: customizations.asyncAwaitAPIs,
                                                     eventLoopFutureClientAPIs: customizations.eventLoopFutureClientAPIs,
                                                     minimumCompilerSupport: customizations.minimumCompilerSupport,
@@ -192,6 +202,7 @@ extension ServiceModelCodeGenerator {
     
     func generateFromModel<ModelType: ServiceModel>(serviceModel: ModelType,
                                                     generationType: GenerationType,
+                                                    integrations: ServiceIntegrations?,
                                                     asyncAwaitClientAPIs: CodeGenFeatureStatus,
                                                     eventLoopFutureClientAPIs: CodeGenFeatureStatus,
                                                     minimumCompilerSupport: MinimumCompilerSupport,
@@ -228,13 +239,17 @@ extension ServiceModelCodeGenerator {
             contentType: "application/json", signAllHeaders: false,
             defaultInvocationTraceContext: InvocationTraceContextDeclaration(name: "SmokeInvocationTraceContext", importPackage: "SmokeOperationsHTTP1"))
         let awsModelErrorsDelegate = SmokeFrameworkModelErrorsDelegate()
+        let defaultContextTypeName = "\(applicationDescription.baseName)OperationsContext"
         
         if generationType.isNotCodeGenPlugIn {
+            let contextTypeName = integrations?.http?.contextTypeName ?? defaultContextTypeName
+            
             generateServerOperationHandlerStubs(generationType: generationType, operationStubGenerationRule: operationStubGenerationRule,
                                                 asyncOperationStubs: asyncOperationStubs)
             generateServerApplicationFiles(generationType: generationType, mainAnnotation: mainAnnotation)
             generateOperationsContext(generationType: generationType)
-            generateOperationsContextGenerator(generationType: generationType, initializationType: initializationType,
+            generateOperationsContextGenerator(generationType: generationType, contextTypeName: contextTypeName,
+                                               initializationType: initializationType,
                                                mainAnnotation: mainAnnotation, asyncInitialization: asyncInitialization)
             generateOperationTests(generationType: generationType, operationStubGenerationRule: operationStubGenerationRule,
                                    asyncOperationStubs: asyncOperationStubs, testDiscovery: testDiscovery)
@@ -281,14 +296,18 @@ extension ServiceModelCodeGenerator {
         }
         
         if generationType.needsHttp1 {
+            let contextTypeName = integrations?.http?.contextTypeName ?? defaultContextTypeName
+            
             generateModelOperationHTTPInput()
             generateModelOperationHTTPOutput()
             generateServerHanderSelector(operationStubGenerationRule: operationStubGenerationRule,
                                          initializationType: initializationType,
+                                         contextTypeName: contextTypeName,
                                          eventLoopFutureOperationHandlers: eventLoopFutureOperationHandlers)
             
             if initializationType == .streamlined {
                 generateStreamlinedOperationsContextProtocolGenerator(generationType: generationType,
+                                                                      contextTypeName: contextTypeName,
                                                                       asyncInitialization: asyncInitialization)
             }
         } else if generationType.isWithPlugin {

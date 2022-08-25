@@ -25,6 +25,7 @@ extension ServiceModelCodeGenerator {
      */
     func generateServerHanderSelector(operationStubGenerationRule: OperationStubGenerationRule,
                                       initializationType: InitializationType,
+                                      contextTypeName: String,
                                       eventLoopFutureOperationHandlers: CodeGenFeatureStatus) {
         
         let fileBuilder = FileBuilder()
@@ -69,14 +70,14 @@ extension ServiceModelCodeGenerator {
         case .original:
             fileBuilder.appendLine("""
                 public func addOperations<SelectorType: SmokeHTTP1HandlerSelector>(selector: inout SelectorType)
-                    where SelectorType.ContextType == \(baseName)OperationsContext,
+                    where SelectorType.ContextType == \(contextTypeName),
                     SelectorType.OperationIdentifer == \(baseName)ModelOperations {
                 """)
         case .streamlined:
             fileBuilder.appendLine("""
                 public extension \(baseName)ModelOperations {
                     static func addToSmokeServer<SelectorType: SmokeHTTP1HandlerSelector>(selector: inout SelectorType)
-                        where SelectorType.ContextType == \(baseName)OperationsContext,
+                        where SelectorType.ContextType == \(contextTypeName),
                         SelectorType.OperationIdentifer == \(baseName)ModelOperations {
                 """)
             fileBuilder.incIndent()
