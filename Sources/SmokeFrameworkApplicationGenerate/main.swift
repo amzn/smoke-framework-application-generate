@@ -38,6 +38,7 @@ struct Parameters {
     var baseFilePath: String
     var baseOutputFilePath: String?
     var generationType: GenerationType
+    var integrations: ServiceIntegrations?
     var applicationDescription: String?
     var modelOverride: ConfigurationProvider<ModelOverride>?
     var generateCodeGenConfig: Bool?
@@ -96,6 +97,7 @@ private func startCodeGeneration(
         applicationDescription: String, applicationSuffix: String,
         modelFilePath: String, modelFormat: ModelFormat,
         generationType: GenerationType,
+        integrations: ServiceIntegrations?,
         asyncAwait: AsyncAwaitCodeGenParameters,
         eventLoopFutureOperationHandlers: CodeGenFeatureStatus,
         initializationType: InitializationType,
@@ -135,7 +137,7 @@ private func startCodeGeneration(
         return try SmokeFrameworkCodeGeneration.generateFromModel(
             modelFilePath: modelFilePath,
             modelType: OpenAPIServiceModel.self,
-            generationType: generationType,
+            generationType: generationType, integrations: integrations,
             customizations: customizations,
             applicationDescription: fullApplicationDescription,
             operationStubGenerationRule: operationStubGenerationRule,
@@ -150,7 +152,7 @@ private func startCodeGeneration(
         return try SmokeFrameworkCodeGeneration.generateFromModel(
             modelFilePath: modelFilePath,
             modelType: SwaggerServiceModel.self,
-            generationType: generationType,
+            generationType: generationType, integrations: integrations,
             customizations: customizations,
             applicationDescription: fullApplicationDescription,
             operationStubGenerationRule: operationStubGenerationRule,
@@ -210,6 +212,7 @@ func handleApplication(parameters: Parameters) throws {
         applicationSuffix: applicationSuffix,
         modelFilePath: parameters.modelFilePath, modelFormat: parameters.modelFormat ?? .swagger,
         generationType: parameters.generationType,
+        integrations: parameters.integrations,
         asyncAwait: parameters.asyncAwait ?? .default,
         eventLoopFutureOperationHandlers: parameters.eventLoopFutureOperationHandlers ?? .disabled,
         initializationType: parameters.initializationType ?? .original,
@@ -241,6 +244,7 @@ func handleApplication(parameters: Parameters) throws {
                                                           baseName: parameters.baseName,
                                                           applicationSuffix: parameters.applicationSuffix,
                                                           generationType: .serverUpdate,
+                                                          integrations: parameters.integrations,
                                                           applicationDescription: parameters.applicationDescription,
                                                           modelOverride: modelOverride,
                                                           httpClientConfiguration: httpClientConfigurationOptional,
@@ -429,6 +433,7 @@ struct SmokeFrameworkApplicationGenerateCommand: ParsableCommand {
             baseFilePath: baseFilePath,
             baseOutputFilePath: baseOutputFilePath,
             generationType: theGenerationType,
+            integrations: config?.integrations,
             applicationDescription: theApplicationDescription,
             modelOverride: modelOverride,
             generateCodeGenConfig: generateCodeGenConfig ?? false,
