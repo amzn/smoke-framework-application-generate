@@ -19,12 +19,14 @@ import Foundation
 import ServiceModelCodeGeneration
 import ServiceModelEntities
 
-public extension ServiceModelCodeGenerator {
+public extension ServiceModelCodeGenerator where TargetSupportType: ModelTargetSupport & HTTP1IntegrationTargetSupport {
     /**
      Generate HTTP input for each operation.
      */
     func generateModelOperationHTTPInput() {
         let baseName = applicationDescription.baseName
+        let modelTargetName = self.targetSupport.modelTargetName
+        let http1IntegrationTargetName = self.targetSupport.http1IntegrationTargetName
         
         let fileBuilder = FileBuilder()
         
@@ -36,12 +38,12 @@ public extension ServiceModelCodeGenerator {
         
         fileBuilder.appendLine("""
             // \(baseName)OperationsHTTPInput.swift
-            // \(baseName)OperationsHTTP1
+            // \(http1IntegrationTargetName)
             //
             
             import Foundation
             import SmokeOperationsHTTP1
-            import \(baseName)Model
+            import \(modelTargetName)
             """)
         
         if case let .external(libraryImport: libraryImport, _) = customizations.validationErrorDeclaration {
@@ -60,6 +62,6 @@ public extension ServiceModelCodeGenerator {
         
         let fileName = "\(baseName)OperationsHTTPInput.swift"
         let baseFilePath = applicationDescription.baseFilePath
-        fileBuilder.write(toFile: fileName, atFilePath: "\(baseFilePath)/Sources/\(baseName)OperationsHTTP1")
+        fileBuilder.write(toFile: fileName, atFilePath: "\(baseFilePath)/Sources/\(http1IntegrationTargetName)")
     }
 }

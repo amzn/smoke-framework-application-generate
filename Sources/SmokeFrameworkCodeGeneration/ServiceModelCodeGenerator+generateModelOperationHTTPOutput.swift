@@ -19,13 +19,14 @@ import Foundation
 import ServiceModelCodeGeneration
 import ServiceModelEntities
 
-public extension ServiceModelCodeGenerator {
+public extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTargetSupport {
     
     /**
      Generate HTTP output for each operation.
      */
     func generateModelOperationHTTPOutput() {
         let baseName = applicationDescription.baseName
+        let http1IntegrationTargetName = self.targetSupport.http1IntegrationTargetName
         
         let fileBuilder = FileBuilder()
         
@@ -37,7 +38,7 @@ public extension ServiceModelCodeGenerator {
         
         fileBuilder.appendLine("""
             // \(baseName)OperationsHTTPOutput.swift
-            // \(baseName)OperationsHTTP1
+            // \(http1IntegrationTargetName)
             //
             
             import Foundation
@@ -62,6 +63,6 @@ public extension ServiceModelCodeGenerator {
         
         let fileName = "\(baseName)OperationsHTTPOutput.swift"
         let baseFilePath = applicationDescription.baseFilePath
-        fileBuilder.write(toFile: fileName, atFilePath: "\(baseFilePath)/Sources/\(baseName)OperationsHTTP1")
+        fileBuilder.write(toFile: fileName, atFilePath: "\(baseFilePath)/Sources/\(http1IntegrationTargetName)")
     }
 }

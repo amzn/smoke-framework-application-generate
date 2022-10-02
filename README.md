@@ -3,7 +3,7 @@
 <img src="https://github.com/amzn/smoke-framework-application-generate/actions/workflows/swift.yml/badge.svg?branch=main" alt="Build - main Branch">
 </a>
 <a href="http://swift.org">
-<img src="https://img.shields.io/badge/swift-5.4|5.5|5.6-orange.svg?style=flat" alt="Swift 5.4, 5.5 and 5.6 Tested">
+<img src="https://img.shields.io/badge/swift-5.5|5.6|5.7-orange.svg?style=flat" alt="Swift 5.5, 5.6 and 5.7 Tested">
 </a>
 <a href="https://gitter.im/SmokeServerSide">
 <img src="https://img.shields.io/badge/chat-on%20gitter-ee115e.svg?style=flat" alt="Join the Smoke Server Side community on gitter">
@@ -15,7 +15,7 @@
 
 Code generator to generate [SmokeFramework](https://github.com/amzn/smoke-framework)-based applications from service models.
 
-# Generate a SmokeFramework application package from a Swagger 2.0 specification file
+# Generate a SmokeFramework application package from an Open API 3.0/Swagger 2.0 specification file
 
 ## Step 1: Check out this repository
 
@@ -25,11 +25,11 @@ Clone this repository to your local machine.
 
 You will point this code generator to this directory to output the generated code.
 
-## Step 3: Create a model describing your service using Swagger 2.0
+## Step 3: Create a model describing your service using Open API 3.0 or Swagger 2.0
 
-Follow the [Swagger specification](https://swagger.io/docs/specification/2-0/basic-structure/) to create an API specification for your service.
-Place this file in the directory you have created. The following steps assume you have called this file `Swagger.yaml` but it
-can be called anything you require.
+Follow the [Open API spec](https://swagger.io/specification/) or [Swagger spec](https://swagger.io/specification/v2/) to create 
+an API specification for your service. Place this file in the directory you have created. The following steps assume you have 
+called this file `OpenAPI30.yaml` but it can be called anything you require.
 
 ## Step 4: Create a configuration file for the code generator
 

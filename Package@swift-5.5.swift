@@ -1,4 +1,4 @@
-// swift-tools-version:5.4
+// swift-tools-version:5.5
 //
 // Copyright 2019-2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 //
@@ -30,7 +30,7 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "SmokeAWSGenerate",
-                 url: "https://github.com/amzn/smoke-aws-generate.git", from: "3.0.0-beta.4"),
+                 url: "https://github.com/amzn/smoke-aws-generate.git", from: "3.0.0-beta.8"),
         .package(name: "ServiceModelSwiftCodeGenerate",
                  url: "https://github.com/amzn/service-model-swift-code-generate.git", from: "3.0.0-beta.10"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),

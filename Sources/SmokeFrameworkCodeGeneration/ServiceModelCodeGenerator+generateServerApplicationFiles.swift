@@ -19,7 +19,7 @@
 import Foundation
 import ServiceModelCodeGeneration
 
-extension ServiceModelCodeGenerator {
+extension ServiceModelCodeGenerator where TargetSupportType: ModelTargetSupport & ClientTargetSupport & HTTP1IntegrationTargetSupport {
     /**
      Generate the main Swift file for the generated application as a Container Server.
      */
@@ -70,6 +70,9 @@ extension ServiceModelCodeGenerator {
         let baseName = applicationDescription.baseName
         let baseFilePath = applicationDescription.baseFilePath
         let applicationSuffix = applicationDescription.applicationSuffix
+        let modelTargetName = self.targetSupport.modelTargetName
+        let clientTargetName = self.targetSupport.clientTargetName
+        let http1IntegrationTargetName = self.targetSupport.http1IntegrationTargetName
         
         let fileName = "Package.swift"
         
@@ -93,17 +96,17 @@ extension ServiceModelCodeGenerator {
                 products: [
                     // Products define the executables and libraries produced by a package, and make them visible to other packages.
                     .library(
-                        name: "\(baseName)Model",
-                        targets: ["\(baseName)Model"]),
+                        name: "\(modelTargetName)",
+                        targets: ["\(modelTargetName)"]),
                     .library(
-                        name: "\(baseName)Client",
-                        targets: ["\(baseName)Client"]),
+                        name: "\(clientTargetName)",
+                        targets: ["\(clientTargetName)"]),
                     .library(
                         name: "\(baseName)Operations",
                         targets: ["\(baseName)Operations"]),
                     .library(
-                        name: "\(baseName)OperationsHTTP1",
-                        targets: ["\(baseName)OperationsHTTP1"]),
+                        name: "\(http1IntegrationTargetName)",
+                        targets: ["\(http1IntegrationTargetName)"]),
                     .executable(
                         name: "\(baseName)\(applicationSuffix)",
                         targets: ["\(baseName)\(applicationSuffix)"]),
@@ -127,7 +130,7 @@ extension ServiceModelCodeGenerator {
                     // Targets are the basic building blocks of a package. A target can define a module or a test suite.
                     // Targets can depend on other targets in this package, and on products in packages which this package depends on.
                     .target(
-                        name: "\(baseName)Model", dependencies: [
+                        name: "\(modelTargetName)", dependencies: [
                             .product(name: "SmokeOperations", package: "smoke-framework"),
                             .product(name: "Logging", package: "swift-log"),
             """)
@@ -144,10 +147,10 @@ extension ServiceModelCodeGenerator {
                         ]),
                     .target(
                         name: "\(baseName)Operations", dependencies: [
-                            .target(name: "\(baseName)Model"),
+                            .target(name: "\(modelTargetName)"),
                         ]),
                     .target(
-                        name: "\(baseName)OperationsHTTP1", dependencies: [
+                        name: "\(http1IntegrationTargetName)", dependencies: [
                             .target(name: "\(baseName)Operations"),
                             .product(name: "SmokeOperationsHTTP1", package: "smoke-framework"),
                             .product(name: "SmokeOperationsHTTP1Server", package: "smoke-framework"),
@@ -164,8 +167,8 @@ extension ServiceModelCodeGenerator {
         fileBuilder.appendLine("""
                         ]),
                     .target(
-                        name: "\(baseName)Client", dependencies: [
-                            .target(name: "\(baseName)Model"),
+                        name: "\(clientTargetName)", dependencies: [
+                            .target(name: "\(modelTargetName)"),
                             .product(name: "SmokeOperationsHTTP1", package: "smoke-framework"),
                             .product(name: "SmokeAWSHttp", package: "smoke-aws"),
             """)
@@ -182,7 +185,7 @@ extension ServiceModelCodeGenerator {
                         ]),
                     .executableTarget(
                         name: "\(baseName)\(applicationSuffix)", dependencies: [
-                            .target(name: "\(baseName)OperationsHTTP1"),
+                            .target(name: "\(http1IntegrationTargetName)"),
                             .product(name: "SmokeAWSCredentials", package: "smoke-aws-credentials"),
                             .product(name: "SmokeOperationsHTTP1Server", package: "smoke-framework"),
                         ]),

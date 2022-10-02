@@ -18,7 +18,7 @@
 import Foundation
 import ServiceModelCodeGeneration
 
-extension ServiceModelCodeGenerator {
+extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTargetSupport {
     /**
      Generate the stub operations context generator for the generated application.
      */
@@ -48,6 +48,7 @@ extension ServiceModelCodeGenerator {
         let baseName = applicationDescription.baseName
         let baseFilePath = applicationDescription.baseFilePath
         let applicationSuffix = applicationDescription.applicationSuffix
+        let http1IntegrationTargetName = self.targetSupport.http1IntegrationTargetName
         
         let fileName = "\(baseName)PerInvocationContextInitializer.swift"
         let filePath = "\(baseFilePath)/Sources/\(baseName)\(applicationSuffix)"
@@ -66,7 +67,7 @@ extension ServiceModelCodeGenerator {
             
             import \(baseName)Model
             import \(baseName)Operations
-            import \(baseName)OperationsHTTP1
+            import \(http1IntegrationTargetName)
             import SmokeHTTP1
             import SmokeOperationsHTTP1
             import SmokeOperationsHTTP1Server
@@ -140,6 +141,7 @@ extension ServiceModelCodeGenerator {
         let baseName = applicationDescription.baseName
         let baseFilePath = applicationDescription.baseFilePath
         let applicationSuffix = applicationDescription.applicationSuffix
+        let http1IntegrationTargetName = self.targetSupport.http1IntegrationTargetName
         
         let fileName = "\(baseName)PerInvocationContextInitializer.swift"
         let filePath = "\(baseFilePath)/Sources/\(baseName)\(applicationSuffix)"
@@ -157,7 +159,7 @@ extension ServiceModelCodeGenerator {
             //
             
             import \(baseName)Operations
-            import \(baseName)OperationsHTTP1
+            import \(http1IntegrationTargetName)
             import SmokeOperationsHTTP1Server
             import SmokeAWSCore
             import NIO
@@ -221,9 +223,10 @@ extension ServiceModelCodeGenerator {
         let baseName = applicationDescription.baseName
         let baseFilePath = applicationDescription.baseFilePath
         let applicationSuffix = applicationDescription.applicationSuffix
+        let http1IntegrationTargetName = self.targetSupport.http1IntegrationTargetName
         
         let fileName = "\(baseName)PerInvocationContextInitializerProtocol.swift"
-        let filePath = "\(baseFilePath)/Sources/\(baseName)OperationsHTTP1"
+        let filePath = "\(baseFilePath)/Sources/\(http1IntegrationTargetName)"
         
         let baseInitializerInfix: String
         let asyncPrefix: String
@@ -242,7 +245,7 @@ extension ServiceModelCodeGenerator {
         fileBuilder.appendLine("""
             //
             // \(baseName)PerInvocationContextInitializerProtocol.swift
-            // \(baseName)OperationsHTTP1
+            // \(http1IntegrationTargetName)
             //
             
             import \(baseName)Model

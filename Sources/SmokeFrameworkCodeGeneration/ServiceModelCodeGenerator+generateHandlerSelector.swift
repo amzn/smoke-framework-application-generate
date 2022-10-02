@@ -19,7 +19,7 @@ import Foundation
 import ServiceModelCodeGeneration
 import ServiceModelEntities
 
-extension ServiceModelCodeGenerator {
+extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTargetSupport {
     /**
      Generate the hander selector for the operation handlers for the generated application.
      */
@@ -31,7 +31,7 @@ extension ServiceModelCodeGenerator {
         let fileBuilder = FileBuilder()
         let baseName = applicationDescription.baseName
         let baseFilePath = applicationDescription.baseFilePath
-        
+        let http1IntegrationTargetName = self.targetSupport.http1IntegrationTargetName
         
         
         addGeneratedFileHeader(fileBuilder: fileBuilder)
@@ -39,7 +39,7 @@ extension ServiceModelCodeGenerator {
         // build a map of http url to operation handler
         fileBuilder.appendLine("""
             // \(baseName)OperationsHanderSelector.swift
-            // \(baseName)OperationsHTTP1
+            // \(http1IntegrationTargetName)
             //
             
             import Foundation
@@ -105,7 +105,7 @@ extension ServiceModelCodeGenerator {
         }
         
         let fileName = "\(baseName)OperationsHanderSelector.swift"
-        fileBuilder.write(toFile: fileName, atFilePath: "\(baseFilePath)/Sources/\(baseName)OperationsHTTP1")
+        fileBuilder.write(toFile: fileName, atFilePath: "\(baseFilePath)/Sources/\(http1IntegrationTargetName)")
     }
     
     private func generateHandlerForOperation(name: String, operationDescription: OperationDescription,
