@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/amzn/smoke-aws-generate.git",
         "state": {
           "branch": null,
-          "revision": "208ccd5e325813269c15f81e31649bdc11cae782",
-          "version": "3.0.0-beta.9"
+          "revision": "5f694d8bd7222ef4654d67bf59fbcbcdc0e8eb00",
+          "version": "3.0.0-beta.10"
         }
       },
       {
@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
           "branch": null,
-          "revision": "6b2aa2748a7881eebb9f84fb10c01293e15b52ca",
-          "version": "0.5.0"
+          "revision": "9f39744e025c7d377987f30b03770805dcb0bcd1",
+          "version": "1.1.4"
         }
       },
       {
