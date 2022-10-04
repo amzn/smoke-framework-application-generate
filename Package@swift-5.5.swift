@@ -30,16 +30,18 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "SmokeAWSGenerate",
-                 url: "https://github.com/amzn/smoke-aws-generate.git", from: "3.0.0-beta.8"),
+                 url: "https://github.com/amzn/smoke-aws-generate.git", from: "3.0.0-beta.9"),
         .package(name: "ServiceModelSwiftCodeGenerate",
-                 url: "https://github.com/amzn/service-model-swift-code-generate.git", from: "3.0.0-beta.10"),
+                 url: "https://github.com/amzn/service-model-swift-code-generate.git", from: "3.0.0-beta.14"),
+        .package(url: "https://github.com/amzn/openapi-swift-code-generate.git", from: "1.0.0-beta.1"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
     ],
     targets: [
         .executableTarget(
             name: "SmokeFrameworkApplicationGenerate", dependencies: [
                 .target(name: "SmokeFrameworkCodeGeneration"),
-                .product(name: "OpenAPIServiceModel", package: "ServiceModelSwiftCodeGenerate"),
+                .product(name: "OpenAPIServiceModel", package: "openapi-swift-code-generate"),
+                .product(name: "SwaggerServiceModel", package: "openapi-swift-code-generate"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]
         ),

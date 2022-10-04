@@ -280,6 +280,10 @@ enum SmokeFrameworkApplicationGenerateCommandError: Error {
     case missingParameter(reason: String)
 }
 
+extension GenerationType: ExpressibleByArgument {
+    
+}
+
 struct SmokeFrameworkApplicationGenerateCommand: ParsableCommand {
     static var configuration: CommandConfiguration {
         return CommandConfiguration(

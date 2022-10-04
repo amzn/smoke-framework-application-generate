@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "OpenAPISwiftCodeGenerate",
+        "repositoryURL": "https://github.com/amzn/openapi-swift-code-generate.git",
+        "state": {
+          "branch": null,
+          "revision": "f724141e19f151197b283ffe05acd7fc691f66d0",
+          "version": "1.0.0-beta.1"
+        }
+      },
+      {
         "package": "OpenAPIKit",
         "repositoryURL": "https://github.com/mattpolzin/OpenAPIKit.git",
         "state": {
@@ -15,8 +24,8 @@
         "repositoryURL": "https://github.com/amzn/service-model-swift-code-generate.git",
         "state": {
           "branch": null,
-          "revision": "a1adc01dc7c692d46484ccc2db154a1f62cb3d33",
-          "version": "3.0.0-beta.12"
+          "revision": "19a9564478f4f929683a36c66aa92d858dc66c8d",
+          "version": "3.0.0-beta.14"
         }
       },
       {
@@ -24,8 +33,8 @@
         "repositoryURL": "https://github.com/amzn/smoke-aws-generate.git",
         "state": {
           "branch": null,
-          "revision": "e2839cfeb9cf6e063c62e15d9375fb67d9a806df",
-          "version": "3.0.0-beta.8"
+          "revision": "208ccd5e325813269c15f81e31649bdc11cae782",
+          "version": "3.0.0-beta.9"
         }
       },
       {

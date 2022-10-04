@@ -20,12 +20,11 @@ import ServiceModelCodeGeneration
 import ServiceModelEntities
 import ServiceModelGenerate
 import SmokeAWSModelGenerate
-import ArgumentParser
 
 /**
  The supported generation types.
  */
-public enum GenerationType: String, Codable, ExpressibleByArgument {
+public enum GenerationType: String, Codable {
     case server
     case serverWithPlugin
     case serverUpdate
