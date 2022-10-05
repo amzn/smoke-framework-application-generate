@@ -12,26 +12,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04]
-        swift: ["5.6", "5.5.3"]
+        swift: ["5.7", "5.6.3", "5.5.3"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: fwal/setup-swift@v1.14.0
+      - uses: swift-actions/setup-swift@v1.18.0
         with:
           swift-version: ${{ matrix.swift }}
       - uses: actions/checkout@v2
       - name: Build
         run: swift build -c release
-  BuildOpenAPIWorkaround:
-    name: Swift ${{ matrix.swift }} on ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-20.04]
-        swift: ["5.4.3"]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: fwal/setup-swift@v1.14.0
-        with:
-          swift-version: ${{ matrix.swift }}
-      - uses: actions/checkout@v2
-      - name: Build
-        run: swift build -Xswiftc -Xfrontend -Xswiftc -sil-verify-none -c release

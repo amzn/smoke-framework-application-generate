@@ -20,12 +20,11 @@ import ServiceModelCodeGeneration
 import ServiceModelEntities
 import ServiceModelGenerate
 import SmokeAWSModelGenerate
-import ArgumentParser
 
 /**
  The supported generation types.
  */
-public enum GenerationType: String, Codable, ExpressibleByArgument {
+public enum GenerationType: String, Codable {
     case server
     case serverWithPlugin
     case serverUpdate
@@ -161,6 +160,8 @@ public struct SmokeFrameworkCodeGeneration {
         modelFilePath: String,
         modelType: ModelType.Type,
         generationType: GenerationType,
+        modelTargetName: String, clientTargetName: String,
+        http1IntegrationTargetName: String,
         integrations: ServiceIntegrations?,
         customizations: CodeGenerationCustomizations,
         applicationDescription: ApplicationDescription,
@@ -171,9 +172,17 @@ public struct SmokeFrameworkCodeGeneration {
         testDiscovery: CodeGenFeatureStatus,
         mainAnnotation: CodeGenFeatureStatus,
         asyncInitialization: CodeGenFeatureStatus,
-        modelOverride: ModelOverride?) throws -> ModelType {
-            func generatorFunction(codeGenerator: ServiceModelCodeGenerator,
-                                   serviceModel: ModelType) throws {
+        modelOverride: ModelOverride?) throws
+    -> ModelType {
+        let targetSupport = SmokeFrameworkTargetSupport(modelTargetName: modelTargetName, clientTargetName: clientTargetName,
+                                                        http1IntegrationTargetName: http1IntegrationTargetName)
+    
+        return try ServiceModelGenerate.generateFromModel(
+            modelFilePath: modelFilePath,
+            customizations: customizations,
+            applicationDescription: applicationDescription,
+            modelOverride: modelOverride,
+            targetSupport: targetSupport) { (codeGenerator, serviceModel) in
                 try codeGenerator.generateFromModel(serviceModel: serviceModel, generationType: generationType,
                                                     integrations: integrations,
                                                     asyncAwaitClientAPIs: customizations.asyncAwaitAPIs,
@@ -188,17 +197,27 @@ public struct SmokeFrameworkCodeGeneration {
                                                     asyncOperationStubs: asyncOperationStubs,
                                                     eventLoopFutureOperationHandlers: eventLoopFutureOperationHandlers)
             }
-        
-            return try ServiceModelGenerate.generateFromModel(
-                    modelFilePath: modelFilePath,
-                    customizations: customizations,
-                    applicationDescription: applicationDescription,
-                    modelOverride: modelOverride,
-                    generatorFunction: generatorFunction)
     }
 }
 
-extension ServiceModelCodeGenerator {
+public protocol HTTP1IntegrationTargetSupport {
+    var http1IntegrationTargetName: String { get }
+}
+
+public struct SmokeFrameworkTargetSupport: ModelTargetSupport, ClientTargetSupport, HTTP1IntegrationTargetSupport {
+    public let modelTargetName: String
+    public let clientTargetName: String
+    public let http1IntegrationTargetName: String
+    
+    public init(modelTargetName: String, clientTargetName: String,
+                http1IntegrationTargetName: String) {
+        self.modelTargetName = modelTargetName
+        self.clientTargetName = clientTargetName
+        self.http1IntegrationTargetName = http1IntegrationTargetName
+    }
+}
+
+extension ServiceModelCodeGenerator where TargetSupportType: ModelTargetSupport & ClientTargetSupport & HTTP1IntegrationTargetSupport {
     
     func generateFromModel<ModelType: ServiceModel>(serviceModel: ModelType,
                                                     generationType: GenerationType,
@@ -214,24 +233,24 @@ extension ServiceModelCodeGenerator {
                                                     operationStubGenerationRule: OperationStubGenerationRule,
                                                     asyncOperationStubs: CodeGenFeatureStatus,
                                                     eventLoopFutureOperationHandlers: CodeGenFeatureStatus) throws {
-        let clientProtocolDelegate = ClientProtocolDelegate(
+        let clientProtocolDelegate = ClientProtocolDelegate<TargetSupportType>(
             baseName: applicationDescription.baseName,
             asyncAwaitAPIs: asyncAwaitClientAPIs,
             eventLoopFutureClientAPIs: eventLoopFutureClientAPIs,
             minimumCompilerSupport: minimumCompilerSupport)
-        let mockClientDelegate = MockClientDelegate(
+        let mockClientDelegate = MockClientDelegate<TargetSupportType>(
             baseName: applicationDescription.baseName,
             isThrowingMock: false,
             asyncAwaitAPIs: asyncAwaitClientAPIs,
             eventLoopFutureClientAPIs: eventLoopFutureClientAPIs,
             minimumCompilerSupport: minimumCompilerSupport)
-        let throwingClientDelegate = MockClientDelegate(
+        let throwingClientDelegate = MockClientDelegate<TargetSupportType>(
             baseName: applicationDescription.baseName,
             isThrowingMock: true,
             asyncAwaitAPIs: asyncAwaitClientAPIs,
             eventLoopFutureClientAPIs: eventLoopFutureClientAPIs,
             minimumCompilerSupport: minimumCompilerSupport)
-        let awsClientDelegate = APIGatewayClientDelegate(
+        let awsClientDelegate = APIGatewayClientDelegate<TargetSupportType>(
             baseName: applicationDescription.baseName, asyncAwaitAPIs: asyncAwaitClientAPIs,
             addSendableConformance: customizations.addSendableConformance,
             eventLoopFutureClientAPIs: eventLoopFutureClientAPIs,
@@ -278,7 +297,7 @@ extension ServiceModelCodeGenerator {
             generateModelOperationClientInput()
             generateModelOperationClientOutput()
         } else if generationType.isWithPlugin {
-            generateCodeGenDummyFile(forPackagePostfix: "Client",
+            generateCodeGenDummyFile(targetName: self.targetSupport.clientTargetName,
                                      plugin: "SmokeFrameworkGenerateClient",
                                      generationType: generationType)
         }
@@ -290,7 +309,7 @@ extension ServiceModelCodeGenerator {
             generateModelErrors(delegate: awsModelErrorsDelegate)
             generateDefaultInstances(generationType: .internalTypes)
         } else if generationType.isWithPlugin {
-            generateCodeGenDummyFile(forPackagePostfix: "Model",
+            generateCodeGenDummyFile(targetName: self.targetSupport.modelTargetName,
                                      plugin: "SmokeFrameworkGenerateModel",
                                      generationType: generationType)
         }
@@ -311,7 +330,7 @@ extension ServiceModelCodeGenerator {
                                                                       asyncInitialization: asyncInitialization)
             }
         } else if generationType.isWithPlugin {
-            generateCodeGenDummyFile(forPackagePostfix: "OperationsHTTP1",
+            generateCodeGenDummyFile(targetName: self.targetSupport.http1IntegrationTargetName,
                                      plugin: "SmokeFrameworkGenerateHttp1",
                                      generationType: generationType)
         }
@@ -320,14 +339,14 @@ extension ServiceModelCodeGenerator {
     // Due to a current limitation of the SPM plugins for code generators, a placeholder Swift file
     // is required in each package to avoid the package as being seen as empty. These files need to
     // be a Swift file but doesn't require any particular contents.
-    func generateCodeGenDummyFile(forPackagePostfix packagePostix: String,
-                                  plugin: String,
-                                  generationType: GenerationType) {
+    private func generateCodeGenDummyFile(targetName: String,
+                                          plugin: String,
+                                          generationType: GenerationType) {
         let fileBuilder = FileBuilder()
         let baseFilePath = applicationDescription.baseFilePath
         let fileName = "codegen.swift"
-        let filePath = "\(baseFilePath)/Sources/\(applicationDescription.baseName)\(packagePostix)"
-        
+        let filePath = "\(baseFilePath)/Sources/\(targetName)"
+
         if generationType.isUpdate {
             guard !FileManager.default.fileExists(atPath: "\(filePath)/\(fileName)") else {
                 return

@@ -92,7 +92,7 @@ extension ModelClientDelegate {
     }
     
     private func addInstanceVariables(isQuery: Bool, httpClientConfiguration: HttpClientConfiguration,
-                                      codeGenerator: ServiceModelCodeGenerator, clientAttributes: AWSClientAttributes,
+                                      codeGenerator: ServiceModelCodeGenerator<TargetSupportType>, clientAttributes: AWSClientAttributes,
                                       targetsAPIGateway: Bool, targetValue: String, fileBuilder: FileBuilder) -> HttpClientSignatureParameters {
         let targetOrVersionParameter: String
         let targetAssignment: String
@@ -164,7 +164,7 @@ extension ModelClientDelegate {
     }
     
     fileprivate func addInitializerBody(httpClientConfiguration: HttpClientConfiguration, isQuery: Bool, baseName: String,
-                                        codeGenerator: ServiceModelCodeGenerator, regionAssignmentPostfix: String,
+                                        codeGenerator: ServiceModelCodeGenerator<TargetSupportType>, regionAssignmentPostfix: String,
                                         signatureParameters: HttpClientSignatureParameters, targetsAPIGateway: Bool, fileBuilder: FileBuilder) {
         addDelegateForHttpClient(httpClientConfiguration: httpClientConfiguration, isQuery: isQuery,
                                  baseName: baseName, fileBuilder: fileBuilder)
@@ -213,7 +213,7 @@ extension ModelClientDelegate {
     
     func addAWSClientCommonFunctions(fileBuilder: FileBuilder, baseName: String,
                                      clientAttributes: AWSClientAttributes,
-                                     codeGenerator: ServiceModelCodeGenerator,
+                                     codeGenerator: ServiceModelCodeGenerator<TargetSupportType>,
                                      targetsAPIGateway: Bool,
                                      isQuery: Bool) {
         let targetValue: String

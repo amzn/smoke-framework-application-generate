@@ -38,9 +38,10 @@ let package = Package(
             targets: ["SmokeFrameworkGenerateHttp1"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/amzn/smoke-aws-generate.git", from: "3.0.0-beta.5"),
-        .package(url: "https://github.com/amzn/service-model-swift-code-generate.git", from: "3.0.0-beta.10"),
-        .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
+        .package(url: "https://github.com/amzn/smoke-aws-generate.git", from: "3.0.0-beta.10"),
+        .package(url: "https://github.com/amzn/service-model-swift-code-generate.git", from: "3.0.0-beta.14"),
+        .package(url: "https://github.com/amzn/openapi-swift-code-generate.git", from: "1.0.0-beta.1"),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
     ],
     targets: [
         .plugin(
@@ -61,14 +62,15 @@ let package = Package(
         .executableTarget(
             name: "SmokeFrameworkApplicationGenerate", dependencies: [
                 .target(name: "SmokeFrameworkCodeGeneration"),
-                .product(name: "OpenAPIServiceModel", package: "service-model-swift-code-generate"),
+                .product(name: "OpenAPIServiceModel", package: "openapi-swift-code-generate"),
+                .product(name: "SwaggerServiceModel", package: "openapi-swift-code-generate"),
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]
         ),
         .target(
             name: "SmokeFrameworkCodeGeneration", dependencies: [
                 .product(name: "ServiceModelGenerate", package: "service-model-swift-code-generate"),
                 .product(name: "SmokeAWSModelGenerate", package: "smoke-aws-generate"),
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]
         ),
         .testTarget(

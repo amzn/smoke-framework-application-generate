@@ -1,4 +1,4 @@
-// swift-tools-version:5.4
+// swift-tools-version:5.5
 //
 // Copyright 2019-2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 //
@@ -30,16 +30,18 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "SmokeAWSGenerate",
-                 url: "https://github.com/amzn/smoke-aws-generate.git", from: "3.0.0-beta.4"),
+                 url: "https://github.com/amzn/smoke-aws-generate.git", from: "3.0.0-beta.10"),
         .package(name: "ServiceModelSwiftCodeGenerate",
-                 url: "https://github.com/amzn/service-model-swift-code-generate.git", from: "3.0.0-beta.10"),
-        .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
+                 url: "https://github.com/amzn/service-model-swift-code-generate.git", from: "3.0.0-beta.14"),
+        .package(url: "https://github.com/amzn/openapi-swift-code-generate.git", from: "1.0.0-beta.1"),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
     ],
     targets: [
         .executableTarget(
             name: "SmokeFrameworkApplicationGenerate", dependencies: [
                 .target(name: "SmokeFrameworkCodeGeneration"),
-                .product(name: "OpenAPIServiceModel", package: "ServiceModelSwiftCodeGenerate"),
+                .product(name: "OpenAPIServiceModel", package: "openapi-swift-code-generate"),
+                .product(name: "SwaggerServiceModel", package: "openapi-swift-code-generate"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]
         ),

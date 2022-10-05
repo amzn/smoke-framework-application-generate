@@ -131,13 +131,19 @@ private func startCodeGeneration(
         baseFilePath: baseFilePath,
         applicationDescription: applicationDescription,
         applicationSuffix: applicationSuffix)
+            
+    let modelTargetName = "\(baseName)Model"
+    let clientTargetName = "\(baseName)Client"
+    let http1IntegrationTargetName = "\(baseName)OperationsHTTP1"
     
     switch modelFormat {
     case .openAPI30:
         return try SmokeFrameworkCodeGeneration.generateFromModel(
             modelFilePath: modelFilePath,
             modelType: OpenAPIServiceModel.self,
-            generationType: generationType, integrations: integrations,
+            generationType: generationType,
+            modelTargetName: modelTargetName, clientTargetName: clientTargetName,
+            http1IntegrationTargetName: http1IntegrationTargetName, integrations: integrations,
             customizations: customizations,
             applicationDescription: fullApplicationDescription,
             operationStubGenerationRule: operationStubGenerationRule,
@@ -152,7 +158,9 @@ private func startCodeGeneration(
         return try SmokeFrameworkCodeGeneration.generateFromModel(
             modelFilePath: modelFilePath,
             modelType: SwaggerServiceModel.self,
-            generationType: generationType, integrations: integrations,
+            generationType: generationType,
+            modelTargetName: modelTargetName, clientTargetName: clientTargetName,
+            http1IntegrationTargetName: http1IntegrationTargetName, integrations: integrations,
             customizations: customizations,
             applicationDescription: fullApplicationDescription,
             operationStubGenerationRule: operationStubGenerationRule,
@@ -270,6 +278,10 @@ func handleApplication(parameters: Parameters) throws {
 
 enum SmokeFrameworkApplicationGenerateCommandError: Error {
     case missingParameter(reason: String)
+}
+
+extension GenerationType: ExpressibleByArgument {
+    
 }
 
 struct SmokeFrameworkApplicationGenerateCommand: ParsableCommand {
