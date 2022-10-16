@@ -120,7 +120,7 @@ extension ServiceModelCodeGenerator where TargetSupportType: ModelTargetSupport 
         
         if case .serverWithPlugin = generationType {
             fileBuilder.appendLine("""
-                        .package(url: "https://github.com/amzn/smoke-framework-application-generate", from: "3.0.0-beta.1")
+                        .package(url: "https://github.com/amzn/smoke-framework-application-generate", from: "3.0.0-rc.1")
                 """)
         }
         
