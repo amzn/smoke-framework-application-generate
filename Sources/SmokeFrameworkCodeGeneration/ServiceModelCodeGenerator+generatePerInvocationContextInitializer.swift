@@ -71,7 +71,7 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
             import SmokeHTTP1
             import SmokeOperationsHTTP1
             import SmokeOperationsHTTP1Server
-            import AWSCore
+            import AWSLogging
             import NIO
             
             typealias \(baseName)OperationDelegate = JSONPayloadHTTP1OperationDelegate<SmokeInvocationTraceContext>
@@ -161,7 +161,7 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
             import \(baseName)Operations
             import \(http1IntegrationTargetName)
             import SmokeOperationsHTTP1Server
-            import AWSCore
+            import AWSLogging
             import NIO
                         
             /**

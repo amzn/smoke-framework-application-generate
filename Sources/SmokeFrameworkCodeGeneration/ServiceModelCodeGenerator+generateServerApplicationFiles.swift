@@ -188,6 +188,7 @@ extension ServiceModelCodeGenerator where TargetSupportType: ModelTargetSupport 
                             .target(name: "\(http1IntegrationTargetName)"),
                             .product(name: "SmokeAWSCredentials", package: "smoke-aws-credentials"),
                             .product(name: "SmokeOperationsHTTP1Server", package: "smoke-framework"),
+                            .product(name: "AWSLogging", package: "smoke-aws-support"),
                         ]),
                     .testTarget(
                         name: "\(baseName)OperationsTests", dependencies: [
