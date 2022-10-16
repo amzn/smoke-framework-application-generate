@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/mattpolzin/OpenAPIKit.git",
         "state": {
           "branch": null,
-          "revision": "0c668112f9803c1858ed070f9e8ce84922a0b41f",
-          "version": "3.0.0-alpha.4"
+          "revision": "15e39d1594b5da2b11d63f141203296d48cc5213",
+          "version": "3.0.0-alpha.5"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/amzn/service-model-swift-code-generate.git",
         "state": {
           "branch": null,
-          "revision": "19a9564478f4f929683a36c66aa92d858dc66c8d",
-          "version": "3.0.0-beta.14"
+          "revision": "42c354dc16893d30d602bd24f8f570f20fc6206a",
+          "version": "3.0.0-rc.1"
         }
       },
       {
@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/amzn/smoke-aws-generate.git",
         "state": {
           "branch": null,
-          "revision": "5f694d8bd7222ef4654d67bf59fbcbcdc0e8eb00",
-          "version": "3.0.0-beta.10"
+          "revision": "8d2dcd6f7782cd76ff7c98aae58a6a515281f4d5",
+          "version": "3.0.0-rc.1"
         }
       },
       {

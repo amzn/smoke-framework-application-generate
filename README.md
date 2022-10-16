@@ -243,7 +243,7 @@ For the Client package-
     name: "EmptyExampleClient", dependencies: [
         .target(name: "EmptyExampleModel"),
         .product(name: "SmokeOperationsHTTP1", package: "smoke-framework"),
-        .product(name: "SmokeAWSHttp", package: "smoke-aws"),
+        .product(name: "AWSHttp", package: "smoke-aws-support"),
     ],
     plugins: [
         .plugin(name: "SmokeFrameworkGenerateClient", package: "smoke-framework-application-generate")
@@ -330,7 +330,7 @@ and then as a dependency of any targets you are using the SPM plugin for.
     name: "EmptyExampleClient", dependencies: [
         .target(name: "EmptyExampleModel"),
         .product(name: "SmokeOperationsHTTP1", package: "smoke-framework"),
-        .product(name: "SmokeAWSHttp", package: "smoke-aws"),
+        .product(name: "AWSHttp", package: "smoke-aws-support"),
         .product(name: "MyModelPackage", package: "my-model-package"),
     ],
     plugins: [
