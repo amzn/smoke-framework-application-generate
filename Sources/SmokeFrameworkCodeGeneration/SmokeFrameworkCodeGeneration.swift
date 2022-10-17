@@ -287,13 +287,13 @@ extension ServiceModelCodeGenerator where TargetSupportType: ModelTargetSupport 
                 generatorFileType = .clientGenerator
             }
             
-            generateClient(delegate: clientProtocolDelegate, fileType: .clientImplementation)
-            generateClient(delegate: mockClientDelegate, fileType: .clientImplementation)
-            generateClient(delegate: throwingClientDelegate, fileType: .clientImplementation)
-            generateClient(delegate: awsClientDelegate, fileType: .clientImplementation)
-            generateClient(delegate: awsClientDelegate, fileType: generatorFileType)
-            generateOperationsReporting()
-            generateInvocationsReporting()
+            generateAWSClient(delegate: clientProtocolDelegate, fileType: .clientImplementation)
+            generateAWSClient(delegate: mockClientDelegate, fileType: .clientImplementation)
+            generateAWSClient(delegate: throwingClientDelegate, fileType: .clientImplementation)
+            generateAWSClient(delegate: awsClientDelegate, fileType: .clientImplementation)
+            generateAWSClient(delegate: awsClientDelegate, fileType: generatorFileType)
+            generateAWSOperationsReporting()
+            generateAWSInvocationsReporting()
             generateModelOperationClientInput()
             generateModelOperationClientOutput()
         } else if generationType.isWithPlugin {

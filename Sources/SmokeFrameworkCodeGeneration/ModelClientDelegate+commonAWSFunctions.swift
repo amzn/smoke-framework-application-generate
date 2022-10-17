@@ -30,8 +30,8 @@ private struct HttpClientSignatureParameters {
 extension ModelClientDelegate {
     func addAWSClientFileHeader(fileBuilder: FileBuilder, baseName: String) {
         fileBuilder.appendLine("""
-            import SmokeAWSCore
-            import SmokeAWSHttp
+            import AWSCore
+            import AWSHttp
             import NIO
             import NIOHTTP1
             

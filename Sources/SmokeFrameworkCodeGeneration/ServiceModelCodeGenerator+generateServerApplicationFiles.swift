@@ -114,13 +114,13 @@ extension ServiceModelCodeGenerator where TargetSupportType: ModelTargetSupport 
                 dependencies: [
                     .package(url: "https://github.com/amzn/smoke-framework.git", from: "2.7.0"),
                     .package(url: "https://github.com/amzn/smoke-aws-credentials.git", from: "2.0.0"),
-                    .package(url: "https://github.com/amzn/smoke-aws.git", from: "2.0.0"),
+                    .package(url: "https://github.com/amzn/smoke-aws-support.git", from: "1.0.0"),
                     .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
             """)
         
         if case .serverWithPlugin = generationType {
             fileBuilder.appendLine("""
-                        .package(url: "https://github.com/amzn/smoke-framework-application-generate", from: "3.0.0-beta.1")
+                        .package(url: "https://github.com/amzn/smoke-framework-application-generate", from: "3.0.0-rc.1")
                 """)
         }
         
@@ -170,7 +170,7 @@ extension ServiceModelCodeGenerator where TargetSupportType: ModelTargetSupport 
                         name: "\(clientTargetName)", dependencies: [
                             .target(name: "\(modelTargetName)"),
                             .product(name: "SmokeOperationsHTTP1", package: "smoke-framework"),
-                            .product(name: "SmokeAWSHttp", package: "smoke-aws"),
+                            .product(name: "AWSHttp", package: "smoke-aws-support"),
             """)
         
         if case .serverWithPlugin = generationType {
@@ -188,6 +188,7 @@ extension ServiceModelCodeGenerator where TargetSupportType: ModelTargetSupport 
                             .target(name: "\(http1IntegrationTargetName)"),
                             .product(name: "SmokeAWSCredentials", package: "smoke-aws-credentials"),
                             .product(name: "SmokeOperationsHTTP1Server", package: "smoke-framework"),
+                            .product(name: "AWSLogging", package: "smoke-aws-support"),
                         ]),
                     .testTarget(
                         name: "\(baseName)OperationsTests", dependencies: [
