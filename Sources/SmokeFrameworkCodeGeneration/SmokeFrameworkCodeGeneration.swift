@@ -172,7 +172,7 @@ public struct SmokeFrameworkCodeGeneration {
         testDiscovery: CodeGenFeatureStatus,
         mainAnnotation: CodeGenFeatureStatus,
         asyncInitialization: CodeGenFeatureStatus,
-        modelOverride: ModelOverride?) throws
+        modelOverride: ModelOverride<ModelType.OverridesType>?) throws
     -> ModelType {
         let targetSupport = SmokeFrameworkTargetSupport(modelTargetName: modelTargetName, clientTargetName: clientTargetName,
                                                         http1IntegrationTargetName: http1IntegrationTargetName)
@@ -219,38 +219,38 @@ public struct SmokeFrameworkTargetSupport: ModelTargetSupport, ClientTargetSuppo
 
 extension ServiceModelCodeGenerator where TargetSupportType: ModelTargetSupport & ClientTargetSupport & HTTP1IntegrationTargetSupport {
     
-    func generateFromModel<ModelType: ServiceModel>(serviceModel: ModelType,
-                                                    generationType: GenerationType,
-                                                    integrations: ServiceIntegrations?,
-                                                    asyncAwaitClientAPIs: CodeGenFeatureStatus,
-                                                    eventLoopFutureClientAPIs: CodeGenFeatureStatus,
-                                                    minimumCompilerSupport: MinimumCompilerSupport,
-                                                    clientConfigurationType: ClientConfigurationType,
-                                                    initializationType: InitializationType,
-                                                    testDiscovery: CodeGenFeatureStatus,
-                                                    mainAnnotation: CodeGenFeatureStatus,
-                                                    asyncInitialization: CodeGenFeatureStatus,
-                                                    operationStubGenerationRule: OperationStubGenerationRule,
-                                                    asyncOperationStubs: CodeGenFeatureStatus,
-                                                    eventLoopFutureOperationHandlers: CodeGenFeatureStatus) throws {
-        let clientProtocolDelegate = ClientProtocolDelegate<TargetSupportType>(
+    func generateFromModel(serviceModel: ModelType,
+                           generationType: GenerationType,
+                           integrations: ServiceIntegrations?,
+                           asyncAwaitClientAPIs: CodeGenFeatureStatus,
+                           eventLoopFutureClientAPIs: CodeGenFeatureStatus,
+                           minimumCompilerSupport: MinimumCompilerSupport,
+                           clientConfigurationType: ClientConfigurationType,
+                           initializationType: InitializationType,
+                           testDiscovery: CodeGenFeatureStatus,
+                           mainAnnotation: CodeGenFeatureStatus,
+                           asyncInitialization: CodeGenFeatureStatus,
+                           operationStubGenerationRule: OperationStubGenerationRule,
+                           asyncOperationStubs: CodeGenFeatureStatus,
+                           eventLoopFutureOperationHandlers: CodeGenFeatureStatus) throws {
+        let clientProtocolDelegate = ClientProtocolDelegate<ModelType, TargetSupportType>(
             baseName: applicationDescription.baseName,
             asyncAwaitAPIs: asyncAwaitClientAPIs,
             eventLoopFutureClientAPIs: eventLoopFutureClientAPIs,
             minimumCompilerSupport: minimumCompilerSupport)
-        let mockClientDelegate = MockClientDelegate<TargetSupportType>(
+        let mockClientDelegate = MockClientDelegate<ModelType, TargetSupportType>(
             baseName: applicationDescription.baseName,
             isThrowingMock: false,
             asyncAwaitAPIs: asyncAwaitClientAPIs,
             eventLoopFutureClientAPIs: eventLoopFutureClientAPIs,
             minimumCompilerSupport: minimumCompilerSupport)
-        let throwingClientDelegate = MockClientDelegate<TargetSupportType>(
+        let throwingClientDelegate = MockClientDelegate<ModelType, TargetSupportType>(
             baseName: applicationDescription.baseName,
             isThrowingMock: true,
             asyncAwaitAPIs: asyncAwaitClientAPIs,
             eventLoopFutureClientAPIs: eventLoopFutureClientAPIs,
             minimumCompilerSupport: minimumCompilerSupport)
-        let awsClientDelegate = APIGatewayClientDelegate<TargetSupportType>(
+        let awsClientDelegate = APIGatewayClientDelegate<ModelType, TargetSupportType>(
             baseName: applicationDescription.baseName, asyncAwaitAPIs: asyncAwaitClientAPIs,
             addSendableConformance: customizations.addSendableConformance,
             eventLoopFutureClientAPIs: eventLoopFutureClientAPIs,

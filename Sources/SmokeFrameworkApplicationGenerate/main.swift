@@ -40,7 +40,7 @@ struct Parameters {
     var generationType: GenerationType
     var integrations: ServiceIntegrations?
     var applicationDescription: String?
-    var modelOverride: ConfigurationProvider<ModelOverride>?
+    var modelOverride: ConfigurationProvider<ModelOverride<NoModelTypeOverrides>>?
     var generateCodeGenConfig: Bool?
     var httpClientConfiguration: ConfigurationProvider<HttpClientConfiguration>?
     var asyncAwait: AsyncAwaitCodeGenParameters?
@@ -55,8 +55,8 @@ struct Parameters {
     var operationStubGenerationRule: OperationStubGenerationRule
 }
 
-private func getModelOverride(modelOverridePath: String?) throws -> ModelOverride? {
-    let modelOverride: ModelOverride?
+private func getModelOverride(modelOverridePath: String?) throws -> ModelOverride<NoModelTypeOverrides>? {
+    let modelOverride: ModelOverride<NoModelTypeOverrides>?
     if let modelOverridePath = modelOverridePath {
         let overrideFile = FileHandle(forReadingAtPath: modelOverridePath)
         
@@ -64,7 +64,7 @@ private func getModelOverride(modelOverridePath: String?) throws -> ModelOverrid
             fatalError("Specified model file '\(modelOverridePath)' doesn't exist.")
         }
         
-        modelOverride = try JSONDecoder().decode(ModelOverride.self, from: overrideData)
+        modelOverride = try JSONDecoder().decode(ModelOverride<NoModelTypeOverrides>.self, from: overrideData)
     } else {
         modelOverride = nil
     }
@@ -108,7 +108,7 @@ private func startCodeGeneration(
         minimumCompilerSupport: MinimumCompilerSupport,
         clientConfigurationType: ClientConfigurationType,
         operationStubGenerationRule: OperationStubGenerationRule,
-        modelOverride: ModelOverride?) throws -> ServiceModel {
+        modelOverride: ModelOverride<NoModelTypeOverrides>?) throws -> [String] {
     let validationErrorDeclaration = ErrorDeclaration.external(
         libraryImport: "SmokeOperations",
         errorType: "SmokeOperationsError")
@@ -138,7 +138,7 @@ private func startCodeGeneration(
     
     switch modelFormat {
     case .openAPI30:
-        return try SmokeFrameworkCodeGeneration.generateFromModel(
+        let model = try SmokeFrameworkCodeGeneration.generateFromModel(
             modelFilePath: modelFilePath,
             modelType: OpenAPIServiceModel.self,
             generationType: generationType,
@@ -154,8 +154,10 @@ private func startCodeGeneration(
             mainAnnotation: mainAnnotation,
             asyncInitialization: asyncAwait.asyncInitialization ?? .disabled,
             modelOverride: modelOverride)
+        
+        return Array(model.operationDescriptions.keys)
     case .swagger:
-        return try SmokeFrameworkCodeGeneration.generateFromModel(
+        let model = try SmokeFrameworkCodeGeneration.generateFromModel(
             modelFilePath: modelFilePath,
             modelType: SwaggerServiceModel.self,
             generationType: generationType,
@@ -171,11 +173,13 @@ private func startCodeGeneration(
             mainAnnotation: mainAnnotation,
             asyncInitialization: asyncAwait.asyncInitialization ?? .disabled,
             modelOverride: modelOverride)
+        
+        return Array(model.operationDescriptions.keys)
     }
 }
 
 func handleApplication(parameters: Parameters) throws {
-    let modelOverride: ModelOverride?
+    let modelOverride: ModelOverride<NoModelTypeOverrides>?
     switch parameters.modelOverride {
     case .provided(let provided):
         modelOverride = provided
@@ -212,7 +216,7 @@ func handleApplication(parameters: Parameters) throws {
         applicationDescription = "The \(parameters.baseName)\(applicationSuffix)."
     }
     
-    let model = try startCodeGeneration(
+    let existingOperations = try startCodeGeneration(
         httpClientConfiguration: httpClientConfiguration,
         baseName: parameters.baseName,
         baseFilePath: parameters.baseOutputFilePath ?? parameters.baseFilePath,
@@ -245,9 +249,7 @@ func handleApplication(parameters: Parameters) throws {
         } else {
             modelFilePath = parameterModelFilePath
         }
-        
-        let existingOperations = Array(model.operationDescriptions.keys)
-        
+                
         let smokeFrameworkCodeGen = SmokeFrameworkCodeGen(modelFilePath: modelFilePath, modelFormat: parameters.modelFormat,
                                                           baseName: parameters.baseName,
                                                           applicationSuffix: parameters.applicationSuffix,
@@ -399,7 +401,7 @@ struct SmokeFrameworkApplicationGenerateCommand: ParsableCommand {
             theApplicationDescription = nil
         }
         
-        let modelOverride: ConfigurationProvider<ModelOverride>?
+        let modelOverride: ConfigurationProvider<ModelOverride<NoModelTypeOverrides>>?
         if let modelOverridePath = modelOverridePath {
             modelOverride = .atPath(modelOverridePath)
         } else if let modelOverrideFromConfig = config?.modelOverride {
