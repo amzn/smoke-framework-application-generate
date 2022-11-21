@@ -32,7 +32,7 @@ struct SmokeFrameworkCodeGen: Codable {
     let generationType: GenerationType
     let integrations: ServiceIntegrations?
     let applicationDescription: String?
-    let modelOverride: ModelOverride?
+    let modelOverride: ModelOverride<NoModelTypeOverrides>?
     let httpClientConfiguration: HttpClientConfiguration?
     let asyncAwait: AsyncAwaitCodeGenParameters?
     let eventLoopFutureOperationHandlers: CodeGenFeatureStatus?
