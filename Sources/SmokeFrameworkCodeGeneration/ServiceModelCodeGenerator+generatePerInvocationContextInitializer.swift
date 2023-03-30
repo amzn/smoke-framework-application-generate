@@ -37,6 +37,9 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
                                                           contextTypeName: contextTypeName,
                                                           mainAnnotation: mainAnnotation,
                                                           asyncInitialization: asyncInitialization)
+        case .v3:
+            generateV3OperationsContextGenerator(generationType: generationType,
+                                                 contextTypeName: contextTypeName)
         }
     }
     
@@ -274,6 +277,137 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
             
                 static func main() \(asyncPrefix)throws {
                     \(awaitPrefix)SmokeHTTP1Server.runAsOperationServer(Self.init)
+                }
+            }
+            """)
+        
+        fileBuilder.write(toFile: fileName, atFilePath: filePath)
+    }
+    
+    private func generateV3OperationsContextGenerator(generationType: GenerationType,
+                                                      contextTypeName: String) {
+        let fileBuilder = FileBuilder()
+        let baseName = applicationDescription.baseName
+        let baseFilePath = applicationDescription.baseFilePath
+        let applicationSuffix = applicationDescription.applicationSuffix
+        let http1IntegrationTargetName = self.targetSupport.http1IntegrationTargetName
+        
+        let fileName = "\(baseName)PerInvocationContextInitializer.swift"
+        let filePath = "\(baseFilePath)/Sources/\(baseName)\(applicationSuffix)"
+        
+        if generationType.isUpdate {
+            guard !FileManager.default.fileExists(atPath: "\(filePath)/\(fileName)") else {
+                return
+            }
+        }
+        
+        fileBuilder.appendLine("""
+            //
+            // \(baseName)PerInvocationContextInitializer.swift
+            // \(baseName)\(applicationSuffix)
+            //
+            
+            import \(baseName)Operations
+            import \(http1IntegrationTargetName)
+            import SmokeOperationsHTTP1Server
+            import AWSLogging
+            import NIO
+                        
+            /**
+             Initializer for the \(baseName)\(applicationSuffix).
+             */
+            @main
+            """)
+        
+        fileBuilder.appendLine("""
+            struct \(baseName)PerInvocationContextInitializer: \(baseName)PerInvocationContextInitializerProtocol {
+                let serverConfiguration: SmokeServerConfiguration<OperationIdentifer>
+            
+                // TODO: Add properties to be accessed by the operation handlers
+            
+                /**
+                 On application startup.
+                 */
+                init(eventLoopGroup: EventLoopGroup) async throws {
+                    CloudwatchStandardErrorLogger.enableLogging()
+            
+                    // TODO: Add additional application initialization
+            
+                    self.serverConfiguration = .init()
+                }
+            
+                /**
+                 On invocation.
+                */
+                public func getInvocationContext(requestContext: HTTPServerRequestContext<OperationIdentifer>)
+                -> \(contextTypeName) {
+                    return \(contextTypeName)(logger: invocationReporting.logger)
+                }
+            
+                /**
+                 On application shutdown.
+                */
+                func onShutdown() async throws {
+                    
+                }
+            }
+            """)
+        
+        fileBuilder.write(toFile: fileName, atFilePath: filePath)
+    }
+    
+    public func generateV3OperationsContextProtocolGenerator(generationType: GenerationType,
+                                                             contextTypeName: String) {
+        let fileBuilder = FileBuilder()
+        let baseName = applicationDescription.baseName
+        let baseFilePath = applicationDescription.baseFilePath
+        let applicationSuffix = applicationDescription.applicationSuffix
+        let http1IntegrationTargetName = self.targetSupport.http1IntegrationTargetName
+        
+        let fileName = "\(baseName)PerInvocationContextInitializerProtocol.swift"
+        let filePath = "\(baseFilePath)/Sources/\(http1IntegrationTargetName)"
+        
+        fileBuilder.appendLine("""
+            //
+            // \(baseName)PerInvocationContextInitializerProtocol.swift
+            // \(http1IntegrationTargetName)
+            //
+            
+            import \(baseName)Model
+            import \(baseName)Operations
+            import NIO
+            import SmokeAsyncHTTP1Server
+            import SmokeOperationsHTTP1Server
+                        
+            /**
+             Convenience protocol for the initialization of \(baseName)\(applicationSuffix).
+             Use this Base protocol to use the default middleware stack and router.
+             */
+            public protocol \(baseName)PerInvocationContextInitializerProtocol: \(baseName)BasePerInvocationContextInitializerProtocol
+            where MiddlewareStackType == ServerMiddlewareStack<BasicSmokeServerRouter<OperationIdentifer>, ContextType> {
+            }
+            
+            /**
+             Convenience protocol for the initialization of \(baseName)\(applicationSuffix).
+             Use this Base protocol to define a custom middleware stack, router or both.
+             */
+            public protocol \(baseName)BasePerInvocationContextInitializerProtocol: SmokeAsyncServerPerInvocationContextInitializer
+            where ContextType == \(contextTypeName), OperationIdentifer == \(baseName)ModelOperations {
+                init(eventLoopGroup: EventLoopGroup) async throws
+            }
+            
+            public extension \(baseName)BasePerInvocationContextInitializerProtocol {
+                // specify how to initalize the server with operations
+                var operationsInitializer: (inout MiddlewareStackType) -> Void {
+                    return \(baseName)ModelOperations.addToSmokeServer
+                }
+            
+                var serverName: String {
+                    return "\(baseName)\(applicationSuffix)"
+                }
+            
+                static func main() async throws {
+                    await AsyncHTTPServer.runAsOperationServer(Self.init)
                 }
             }
             """)

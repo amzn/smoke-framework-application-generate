@@ -49,6 +49,12 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
             import SmokeOperationsHTTP1
             """)
         
+        if case .v3 = initializationType {
+            fileBuilder.appendLine("""
+                import SmokeOperationsHTTP1Server
+                """)
+        }
+        
         switch eventLoopFutureOperationHandlers {
         case .enabled:
             fileBuilder.appendLine("""
@@ -66,6 +72,9 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
             
             """)
 
+        let selectorName: String
+        let addSuccessStatus: Bool
+        let addToStackName: String?
         switch initializationType {
         case .original:
             fileBuilder.appendLine("""
@@ -73,6 +82,10 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
                     where SelectorType.ContextType == \(contextTypeName),
                     SelectorType.OperationIdentifer == \(baseName)ModelOperations {
                 """)
+            
+            selectorName = "selector"
+            addSuccessStatus = false
+            addToStackName = nil
         case .streamlined:
             fileBuilder.appendLine("""
                 public extension \(baseName)ModelOperations {
@@ -81,6 +94,24 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
                         SelectorType.OperationIdentifer == \(baseName)ModelOperations {
                 """)
             fileBuilder.incIndent()
+            
+            selectorName = "selector"
+            addSuccessStatus = false
+            addToStackName = nil
+        case .v3:
+            fileBuilder.appendLine("""
+                public extension \(baseName)ModelOperations {
+                    static func addToSmokeServer<MiddlewareStackType: ServerMiddlewareStackProtocol>(stack: inout MiddlewareStackType)
+                        where MiddlewareStackType.ApplicationContextType == \(contextTypeName),
+                        MiddlewareStackType.RouterType.OperationIdentifer == \(baseName)ModelOperations {
+                
+                        var jsonHelper = JSONPayloadServerMiddlewareHelper<MiddlewareStackType>()
+                """)
+            fileBuilder.incIndent()
+            
+            selectorName = "jsonHelper"
+            addSuccessStatus = true
+            addToStackName = "stack"
         }
         
         fileBuilder.incIndent()
@@ -93,15 +124,20 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
         // iterate through the operations
         for entry in sortedOperations {
             generateHandlerForOperation(name: entry.key, operationDescription: entry.value, baseName: baseName,
-                                        fileBuilder: fileBuilder, operationStubGenerationRule: operationStubGenerationRule)
+                                        fileBuilder: fileBuilder, selectorName: selectorName, addSuccessStatus: addSuccessStatus,
+                                        addToStackName: addToStackName, operationStubGenerationRule: operationStubGenerationRule)
         }
         
         fileBuilder.decIndent()
         fileBuilder.appendLine("}")
         
-        if case .streamlined = initializationType {
+        switch initializationType {
+        case .streamlined, .v3:
             fileBuilder.decIndent()
             fileBuilder.appendLine("}")
+        case .original:
+            // nothing to do
+            break
         }
         
         let fileName = "\(baseName)OperationsHanderSelector.swift"
@@ -110,6 +146,7 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
     
     private func generateHandlerForOperation(name: String, operationDescription: OperationDescription,
                                              baseName: String, fileBuilder: FileBuilder,
+                                             selectorName: String, addSuccessStatus: Bool, addToStackName: String?,
                                              operationStubGenerationRule: OperationStubGenerationRule) {
         if let httpMethod = operationDescription.httpVerb {
             let sortedErrors = operationDescription.errors.sorted { entry1, entry2 in
@@ -127,6 +164,20 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
                 }
             }
             
+            let successStatusParameter: String
+            if addSuccessStatus {
+                successStatusParameter = ", statusOnSuccess: .ok"
+            } else {
+                successStatusParameter = ""
+            }
+            
+            let addToStackParameter: String
+            if let addToStackName {
+                addToStackParameter = ", toStack: &\(addToStackName)"
+            } else {
+                addToStackParameter = ""
+            }
+            
             let operationStubGeneration = operationStubGenerationRule.getStubGeneration(forOperation: name)
 
             let internalName = name.upperToLowerCamelCase
@@ -139,15 +190,16 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
             switch operationStubGeneration {
             case .functionWithinContext:
                 fileBuilder.appendLine("""
-                    selector.addHandlerForOperationProvider(.\(internalName), httpMethod: .\(httpMethod),
-                                                            operationProvider: \(baseName)OperationsContext.handle\(name.startingWithUppercase),
-                                                            allowedErrors: allowedErrorsFor\(name.startingWithUppercase))
+                    \(selectorName).addHandlerForOperationProvider(
+                        .\(internalName), httpMethod: .\(httpMethod),
+                        operationProvider: \(baseName)OperationsContext.handle\(name.startingWithUppercase),
+                        allowedErrors: allowedErrorsFor\(name.startingWithUppercase)\(successStatusParameter)\(addToStackParameter))
                     """)
             case .standaloneFunction:
                 fileBuilder.appendLine("""
-                    selector.addHandlerForOperation(.\(internalName), httpMethod: .\(httpMethod),
-                                                    operation: handle\(name.startingWithUppercase),
-                                                    allowedErrors: allowedErrorsFor\(name.startingWithUppercase))
+                    \(selectorName).addHandlerForOperation(.\(internalName), httpMethod: .\(httpMethod),
+                        operation: handle\(name.startingWithUppercase),
+                        allowedErrors: allowedErrorsFor\(name.startingWithUppercase)\(successStatusParameter)\(addToStackParameter))
                     """)
             }
         }
