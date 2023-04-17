@@ -1,70 +1,68 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "OpenAPISwiftCodeGenerate",
-        "repositoryURL": "https://github.com/amzn/openapi-swift-code-generate.git",
-        "state": {
-          "branch": null,
-          "revision": "4210a8db0c2dc1e78bae9e302165c448d2ee361e",
-          "version": "1.0.0-rc.1"
-        }
-      },
-      {
-        "package": "OpenAPIKit",
-        "repositoryURL": "https://github.com/mattpolzin/OpenAPIKit.git",
-        "state": {
-          "branch": null,
-          "revision": "15e39d1594b5da2b11d63f141203296d48cc5213",
-          "version": "3.0.0-alpha.5"
-        }
-      },
-      {
-        "package": "ServiceModelSwiftCodeGenerate",
-        "repositoryURL": "https://github.com/amzn/service-model-swift-code-generate.git",
-        "state": {
-          "branch": null,
-          "revision": "3cacd62f7290554185ffcf839ec75c4ee2584d8e",
-          "version": "3.0.0-rc.2"
-        }
-      },
-      {
-        "package": "SmokeAWSGenerate",
-        "repositoryURL": "https://github.com/amzn/smoke-aws-generate.git",
-        "state": {
-          "branch": null,
-          "revision": "c091b7e08be0ba5c1f8c08c3a145796c6b800f36",
-          "version": "3.0.0-rc.6"
-        }
-      },
-      {
-        "package": "SwaggerParser",
-        "repositoryURL": "https://github.com/tachyonics/SwaggerParser.git",
-        "state": {
-          "branch": null,
-          "revision": "c0eb70485c59a9d7dd6765dcd303b49fdb3040ee",
-          "version": "0.6.4"
-        }
-      },
-      {
-        "package": "swift-argument-parser",
-        "repositoryURL": "https://github.com/apple/swift-argument-parser",
-        "state": {
-          "branch": null,
-          "revision": "9f39744e025c7d377987f30b03770805dcb0bcd1",
-          "version": "1.1.4"
-        }
-      },
-      {
-        "package": "Yams",
-        "repositoryURL": "https://github.com/jpsim/Yams.git",
-        "state": {
-          "branch": null,
-          "revision": "9ff1cc9327586db4e0c8f46f064b6a82ec1566fa",
-          "version": "4.0.6"
-        }
+  "pins" : [
+    {
+      "identity" : "openapi-swift-code-generate",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/amzn/openapi-swift-code-generate.git",
+      "state" : {
+        "revision" : "9ac750f50061f9046d6dbdf71fe064234f4ed099",
+        "version" : "1.0.1"
       }
-    ]
-  },
-  "version": 1
+    },
+    {
+      "identity" : "openapikit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/mattpolzin/OpenAPIKit.git",
+      "state" : {
+        "revision" : "d40e6c3d57b1b27ac2114861d5a83cf8ee9d206d",
+        "version" : "3.0.0-alpha.6"
+      }
+    },
+    {
+      "identity" : "service-model-swift-code-generate",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/amzn/service-model-swift-code-generate.git",
+      "state" : {
+        "revision" : "b9d45b4d05196c26247d4bd3aca83c1e53eed72c",
+        "version" : "3.0.2"
+      }
+    },
+    {
+      "identity" : "smoke-aws-generate",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/amzn/smoke-aws-generate.git",
+      "state" : {
+        "revision" : "8f0eae3b4afd9f5e586d6fcf6c9f1c171923a83d",
+        "version" : "3.0.0"
+      }
+    },
+    {
+      "identity" : "swaggerparser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tachyonics/SwaggerParser.git",
+      "state" : {
+        "revision" : "c0eb70485c59a9d7dd6765dcd303b49fdb3040ee",
+        "version" : "0.6.4"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "revision" : "fee6933f37fde9a5e12a1e4aeaa93fe60116ff2a",
+        "version" : "1.2.2"
+      }
+    },
+    {
+      "identity" : "yams",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jpsim/Yams.git",
+      "state" : {
+        "revision" : "9ff1cc9327586db4e0c8f46f064b6a82ec1566fa",
+        "version" : "4.0.6"
+      }
+    }
+  ],
+  "version" : 2
 }
