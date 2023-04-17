@@ -3,7 +3,7 @@
 <img src="https://github.com/amzn/smoke-framework-application-generate/actions/workflows/swift.yml/badge.svg?branch=main" alt="Build - main Branch">
 </a>
 <a href="http://swift.org">
-<img src="https://img.shields.io/badge/swift-5.5|5.6|5.7-orange.svg?style=flat" alt="Swift 5.5, 5.6 and 5.7 Tested">
+<img src="https://img.shields.io/badge/swift-5.6|5.7|5.8-orange.svg?style=flat" alt="Swift 5.6, 5.7 and 5.8 Tested">
 </a>
 <a href="https://gitter.im/SmokeServerSide">
 <img src="https://img.shields.io/badge/chat-on%20gitter-ee115e.svg?style=flat" alt="Join the Smoke Server Side community on gitter">

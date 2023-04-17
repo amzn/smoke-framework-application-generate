@@ -11,11 +11,25 @@ jobs:
     name: Swift ${{ matrix.swift }} on ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04]
-        swift: ["5.7", "5.6.3", "5.5.3"]
+        os: [ubuntu-22.04]
+        swift: ["5.8", "5.7.3"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: swift-actions/setup-swift@v1.18.0
+      - uses: swift-actions/setup-swift@v1.23.0
+        with:
+          swift-version: ${{ matrix.swift }}
+      - uses: actions/checkout@v2
+      - name: Build
+        run: swift build -c release
+  OlderVersionBuild:
+    name: Swift ${{ matrix.swift }} on ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+        swift: ["5.6.3"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: swift-actions/setup-swift@v1.23.0
         with:
           swift-version: ${{ matrix.swift }}
       - uses: actions/checkout@v2
