@@ -328,7 +328,7 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
                 /**
                  On application startup.
                  */
-                init(eventLoopGroup: EventLoopGroup) async throws {
+                init() async throws {
                     CloudwatchStandardErrorLogger.enableLogging()
             
                     // TODO: Add additional application initialization
@@ -393,7 +393,7 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
              */
             public protocol \(baseName)BasePerInvocationContextInitializerProtocol: SmokeAsyncServerPerInvocationContextInitializer
             where ContextType == \(contextTypeName), OperationIdentifer == \(baseName)ModelOperations {
-                init(eventLoopGroup: EventLoopGroup) async throws
+                init() async throws
             }
             
             public extension \(baseName)BasePerInvocationContextInitializerProtocol {
