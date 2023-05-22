@@ -288,11 +288,11 @@ extension ServiceModelCodeGenerator where TargetSupportType: ModelTargetSupport 
                 generatorFileType = .clientGenerator
             }
             
-            generateAWSClient(delegate: clientProtocolDelegate, fileType: .clientImplementation)
-            generateAWSClient(delegate: mockClientDelegate, fileType: .clientImplementation)
-            generateAWSClient(delegate: throwingClientDelegate, fileType: .clientImplementation)
-            generateAWSClient(delegate: awsClientDelegate, fileType: .clientImplementation)
-            generateAWSClient(delegate: awsClientDelegate, fileType: generatorFileType)
+            generateSmokeFrameworkClient(delegate: clientProtocolDelegate, fileType: .clientImplementation)
+            generateSmokeFrameworkClient(delegate: mockClientDelegate, fileType: .clientImplementation)
+            generateSmokeFrameworkClient(delegate: throwingClientDelegate, fileType: .clientImplementation)
+            generateSmokeFrameworkClient(delegate: awsClientDelegate, fileType: .clientImplementation)
+            generateSmokeFrameworkClient(delegate: awsClientDelegate, fileType: generatorFileType)
             generateAWSOperationsReporting()
             generateAWSInvocationsReporting()
             generateModelOperationClientInput()
@@ -352,6 +352,13 @@ extension ServiceModelCodeGenerator where TargetSupportType: ModelTargetSupport 
                                      plugin: "SmokeFrameworkGenerateHttp1",
                                      generationType: generationType)
         }
+    }
+    
+    func generateSmokeFrameworkClient<DelegateType: ModelClientDelegate>(delegate: DelegateType, fileType: ClientFileType)
+    where DelegateType.TargetSupportType == TargetSupportType, DelegateType.ModelType == ModelType {
+        let defaultTraceContextType = DefaultTraceContextType(typeName: "SmokeInvocationTraceContext",
+                                                              importTargetName: "SmokeOperationsHTTP1")
+        generateClient(delegate: delegate, fileType: fileType, defaultTraceContextType: defaultTraceContextType)
     }
 
     // Due to a current limitation of the SPM plugins for code generators, a placeholder Swift file
