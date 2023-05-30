@@ -265,7 +265,8 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
                 init(eventLoopGroup: EventLoopGroup) \(asyncPrefix)throws
             }
             
-            public extension \(baseName)PerInvocationContextInitializerProtocol {
+            public extension \(baseName)PerInvocationContextInitializerProtocol
+            where MiddlewareStackType.IncomingOutputWriter == HTTPServerResponseWriter {
                 // specify how to initalize the server with operations
                 var operationsInitializer: OperationsInitializerType {
                     return \(baseName)ModelOperations.addToSmokeServer
@@ -377,6 +378,7 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
             import \(baseName)Operations
             import NIO
             import SmokeAsyncHTTP1Server
+            import SmokeOperationsHTTP1
             import SmokeOperationsHTTP1Server
                         
             /**
@@ -384,7 +386,7 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
              Use this Base protocol to use the default middleware stack and router.
              */
             public protocol \(baseName)PerInvocationContextInitializerProtocol: \(baseName)BasePerInvocationContextInitializerProtocol
-            where MiddlewareStackType == ServerMiddlewareStack<BasicSmokeServerRouter<OperationIdentifer>, ContextType> {
+            where MiddlewareStackType == ServerMiddlewareStack<DefaultBasicServerRouter<OperationIdentifer>, ContextType> {
             }
             
             /**
@@ -396,7 +398,8 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
                 init() async throws
             }
             
-            public extension \(baseName)BasePerInvocationContextInitializerProtocol {
+            public extension \(baseName)BasePerInvocationContextInitializerProtocol
+            where MiddlewareStackType.IncomingOutputWriter == HTTPServerResponseWriter {
                 // specify how to initalize the server with operations
                 var operationsInitializer: (inout MiddlewareStackType) -> Void {
                     return \(baseName)ModelOperations.addToSmokeServer
