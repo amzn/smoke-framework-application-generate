@@ -23,7 +23,7 @@ struct SmokeFrameworkModelErrorsDelegate: ModelErrorsDelegate {
     let optionSetGeneration: ErrorOptionSetGeneration =
         .generateWithCustomConformance(libraryImport: "SmokeOperations", conformanceType: "ErrorIdentifiableByDescription")
     let generateEncodableConformance: Bool = true
-    let generateCustomStringConvertibleConformance: Bool = true
+    let generateCustomStringConvertibleConformance: Bool = false
     let canExpectValidationError: Bool = true
     
     func errorTypeAdditionalImportsGenerator(fileBuilder: FileBuilder,
@@ -102,6 +102,31 @@ struct SmokeFrameworkModelErrorsDelegate: ModelErrorsDelegate {
     
     func errorTypeAdditionalDescriptionCases(fileBuilder: FileBuilder,
                                              errorTypes: [ErrorType]) {
+        // nothing to do
+    }
+    
+    func errorTypeAdditionalExtensions(fileBuilder: FileBuilder,
+                                       errorTypes: [ErrorType],
+                                       baseName: String) {
+        // create an option set to specify the possible errors from an operation
+        
+        fileBuilder.appendLine("""
+            extension \(baseName)Error: Identifiable {
+                public var identity: String {
+                    switch self {
+            """)
+        
+        fileBuilder.incIndent()
+        fileBuilder.incIndent()
+        // for each of the errors
+        for error in errorTypes {
+            let internalName = error.normalizedName
+            fileBuilder.appendLine("""
+                case .\(internalName):
+                    return \(internalName)Identity
+                """)
+        }
+        
         fileBuilder.appendLine("""
             case .validationError:
                 return __validationErrorIdentity
@@ -110,5 +135,48 @@ struct SmokeFrameworkModelErrorsDelegate: ModelErrorsDelegate {
             case .unknownError:
                 return __unknownErrorIdentity
             """)
+        
+        fileBuilder.decIndent()
+        fileBuilder.decIndent()
+        
+        fileBuilder.appendLine("""
+                    }
+                }
+            }
+
+            extension \(baseName)Error: CustomStringConvertible {
+                public var description: String {
+                    switch self {
+            """)
+        
+        fileBuilder.incIndent()
+        fileBuilder.incIndent()
+        // for each of the errors
+        for error in errorTypes {
+            let internalName = error.normalizedName
+            fileBuilder.appendLine("""
+                case .\(internalName)(let details):
+                    return "\(baseName)Error.\\(details)"
+                """)
+        }
+        
+        fileBuilder.appendLine("""
+            case .validationError(reason: let reason):
+                return "\(baseName)Error.\\(__validationErrorIdentity): \\(reason)"
+            case .unrecognizedError(let errorReason, let errorMessage):
+                return "\(baseName)Error.\\(errorReason) (\\(__unrecognizedErrorIdentity)): \\(errorMessage)"
+            case .unknownError:
+                return "\(baseName)Error.\\(__unknownErrorIdentity)"
+            """)
+        
+        fileBuilder.decIndent()
+        fileBuilder.decIndent()
+        
+        fileBuilder.appendLine("""
+                    }
+                }
+            }
+            """)
+        fileBuilder.appendEmptyLine()
     }
 }
