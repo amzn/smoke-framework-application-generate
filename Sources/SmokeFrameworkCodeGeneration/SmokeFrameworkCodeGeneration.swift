@@ -69,6 +69,7 @@ public struct ServiceIntegrations: Codable {
 public enum InitializationType: String, Codable {
     case original = "ORIGINAL"
     case streamlined = "STREAMLINED"
+    case v3 = "V3"
 }
 
 public enum OperationStubGeneration {
@@ -324,10 +325,17 @@ extension ServiceModelCodeGenerator where TargetSupportType: ModelTargetSupport 
                                          contextTypeName: contextTypeName,
                                          eventLoopFutureOperationHandlers: eventLoopFutureOperationHandlers)
             
-            if initializationType == .streamlined {
+            switch initializationType {
+            case .original:
+                // nothing to do
+                break
+            case .streamlined:
                 generateStreamlinedOperationsContextProtocolGenerator(generationType: generationType,
                                                                       contextTypeName: contextTypeName,
                                                                       asyncInitialization: asyncInitialization)
+            case .v3:
+                generateV3OperationsContextProtocolGenerator(generationType: generationType,
+                                                             contextTypeName: contextTypeName)
             }
         } else if generationType.isWithPlugin {
             generateCodeGenDummyFile(targetName: self.targetSupport.http1IntegrationTargetName,

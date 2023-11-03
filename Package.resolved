@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/amzn/openapi-swift-code-generate.git",
       "state" : {
-        "revision" : "9ac750f50061f9046d6dbdf71fe064234f4ed099",
-        "version" : "1.0.1"
+        "revision" : "c89614f73d55fb76d7e9d7c52149e86f61cd4a6b",
+        "version" : "1.0.2"
       }
     },
     {
@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mattpolzin/OpenAPIKit.git",
       "state" : {
-        "revision" : "d40e6c3d57b1b27ac2114861d5a83cf8ee9d206d",
-        "version" : "3.0.0-alpha.6"
+        "revision" : "437c26a58a171a5fd6b2ddffc81709fa2ac9f190",
+        "version" : "3.0.0-rc.3"
       }
     },
     {
@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/amzn/service-model-swift-code-generate.git",
       "state" : {
-        "revision" : "b9d45b4d05196c26247d4bd3aca83c1e53eed72c",
-        "version" : "3.0.2"
+        "revision" : "4e9ffec2cfc53c49aedae96aa16587f9f7b88c38",
+        "version" : "3.1.1"
       }
     },
     {
@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/amzn/smoke-aws-generate.git",
       "state" : {
-        "revision" : "8f0eae3b4afd9f5e586d6fcf6c9f1c171923a83d",
-        "version" : "3.0.0"
+        "revision" : "f16a4fa9c08581904bcb06887e8394b1c864c4d7",
+        "version" : "3.2.0"
       }
     },
     {
@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-argument-parser",
       "state" : {
-        "revision" : "fee6933f37fde9a5e12a1e4aeaa93fe60116ff2a",
-        "version" : "1.2.2"
+        "revision" : "8f4d2753f0e4778c76d5f05ad16c74f707390531",
+        "version" : "1.2.3"
       }
     },
     {

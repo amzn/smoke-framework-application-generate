@@ -73,7 +73,7 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
                     where SelectorType.ContextType == \(contextTypeName),
                     SelectorType.OperationIdentifer == \(baseName)ModelOperations {
                 """)
-        case .streamlined:
+        case .streamlined, .v3:
             fileBuilder.appendLine("""
                 public extension \(baseName)ModelOperations {
                     static func addToSmokeServer<SelectorType: SmokeHTTP1HandlerSelector>(selector: inout SelectorType)
@@ -99,7 +99,11 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
         fileBuilder.decIndent()
         fileBuilder.appendLine("}")
         
-        if case .streamlined = initializationType {
+        switch initializationType {
+        case .original:
+            // nothing to do
+            break
+        case .streamlined, .v3:
             fileBuilder.decIndent()
             fileBuilder.appendLine("}")
         }

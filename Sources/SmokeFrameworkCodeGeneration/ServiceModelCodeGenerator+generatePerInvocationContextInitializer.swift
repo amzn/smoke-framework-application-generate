@@ -33,10 +33,21 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
                                                        contextTypeName: contextTypeName,
                                                        mainAnnotation: mainAnnotation)
         case .streamlined:
-            generateStreamlinedOperationsContextGenerator(generationType: generationType,
-                                                          contextTypeName: contextTypeName,
-                                                          mainAnnotation: mainAnnotation,
-                                                          asyncInitialization: asyncInitialization)
+            generatePerInvocationContextInitializer(forVersion: .streamlined,
+                                                    generationType: generationType,
+                                                    contextTypeName: contextTypeName,
+                                                    mainAnnotation: mainAnnotation,
+                                                    asyncInitialization: asyncInitialization)
+        case .v3:
+            if mainAnnotation == .disabled || asyncInitialization == .disabled {
+                fatalError("The V3 initialization type does not support disabling the main annotation or async initialization.")
+            }
+            
+            generatePerInvocationContextInitializer(forVersion: .v3,
+                                                    generationType: generationType,
+                                                    contextTypeName: contextTypeName,
+                                                    mainAnnotation: mainAnnotation,
+                                                    asyncInitialization: asyncInitialization)
         }
     }
     
@@ -133,10 +144,16 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
         fileBuilder.write(toFile: fileName, atFilePath: filePath)
     }
     
-    private func generateStreamlinedOperationsContextGenerator(generationType: GenerationType,
-                                                               contextTypeName: String,
-                                                               mainAnnotation: CodeGenFeatureStatus,
-                                                               asyncInitialization: CodeGenFeatureStatus) {
+    enum InitializerVersion {
+        case streamlined
+        case v3
+    }
+    
+    private func generatePerInvocationContextInitializer(forVersion version: InitializerVersion,
+                                                         generationType: GenerationType,
+                                                         contextTypeName: String,
+                                                         mainAnnotation: CodeGenFeatureStatus,
+                                                         asyncInitialization: CodeGenFeatureStatus) {
         let fileBuilder = FileBuilder()
         let baseName = applicationDescription.baseName
         let baseFilePath = applicationDescription.baseFilePath
@@ -150,6 +167,14 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
             guard !FileManager.default.fileExists(atPath: "\(filePath)/\(fileName)") else {
                 return
             }
+        }
+        
+        let initializerParameters: String
+        switch version {
+        case .streamlined:
+            initializerParameters = "eventLoopGroup: EventLoopGroup"
+        case .v3:
+            initializerParameters = "configuration: inout SmokeServerConfiguration"
         }
         
         fileBuilder.appendLine("""
@@ -190,7 +215,7 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
                 /**
                  On application startup.
                  */
-                init(eventLoopGroup: EventLoopGroup) \(asyncPrefix)throws {
+                init(\(initializerParameters)) \(asyncPrefix)throws {
                     CloudwatchStandardErrorLogger.enableLogging()
             
                     // TODO: Add additional application initialization
@@ -274,6 +299,56 @@ extension ServiceModelCodeGenerator where TargetSupportType: HTTP1IntegrationTar
             
                 static func main() \(asyncPrefix)throws {
                     \(awaitPrefix)SmokeHTTP1Server.runAsOperationServer(Self.init)
+                }
+            }
+            """)
+        
+        fileBuilder.write(toFile: fileName, atFilePath: filePath)
+    }
+    
+    internal func generateV3OperationsContextProtocolGenerator(generationType: GenerationType,
+                                                               contextTypeName: String) {
+        let fileBuilder = FileBuilder()
+        let baseName = applicationDescription.baseName
+        let baseFilePath = applicationDescription.baseFilePath
+        let applicationSuffix = applicationDescription.applicationSuffix
+        let http1IntegrationTargetName = self.targetSupport.http1IntegrationTargetName
+        
+        let fileName = "\(baseName)PerInvocationContextInitializerProtocol.swift"
+        let filePath = "\(baseFilePath)/Sources/\(http1IntegrationTargetName)"
+        
+        fileBuilder.appendLine("""
+            //
+            // \(baseName)PerInvocationContextInitializerProtocol.swift
+            // \(http1IntegrationTargetName)
+            //
+            
+            import \(baseName)Model
+            import \(baseName)Operations
+            import NIO
+            import SmokeHTTP1
+            import SmokeOperationsHTTP1Server
+                        
+            /**
+             Convenience protocol for the initialization of \(baseName)\(applicationSuffix).
+             */
+            public protocol \(baseName)PerInvocationContextInitializerProtocol: StandardJSONSmokeAsyncServerPerInvocationContextInitializerV3
+            where ContextType == \(contextTypeName), OperationIdentifer == \(baseName)ModelOperations {
+                init(configuration: inout SmokeServerConfiguration) async throws
+            }
+            
+            public extension \(baseName)PerInvocationContextInitializerProtocol {
+                // specify how to initalize the server with operations
+                var operationsInitializer: OperationsInitializerType {
+                    return \(baseName)ModelOperations.addToSmokeServer
+                }
+            
+                var serverName: String {
+                    return "\(baseName)\(applicationSuffix)"
+                }
+            
+                static func main() async throws {
+                    await SmokeHTTP1Server.runAsOperationServer(Self.init)
                 }
             }
             """)
